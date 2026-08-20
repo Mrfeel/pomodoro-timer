@@ -1,0 +1,32 @@
+=== EM000B (1) ===
+Pages: 81
+
+--- Page 1 ---
+1
+
+--- Page 2 ---
+2
+
+
+--- Page 3 ---
+§
+0.1 
+矢量代数
+一、矢量()ˆˆˆ          , ,      or     xxyz x y z yzAAA xA yA z A A A AAæöç÷=++ ®ç÷ç÷èø
+ˆxxyzˆzˆyA222xyzAA A A A== ++coscoscosxxyyzzAAAAAAqqq=ìïï=íï=ïîzqyqxq大小：方向：3
+
+--- Page 80 ---
+n任一曲面相对于O点所张立体角
+ˆnS
+O
+O
+S
+O
+O数值上等于相应的单位半径球面的面积闭曲面总是以外法向作为面元正向2, 2 ,OOSSpp-+ìW=íî 在  上方 在  下方0 , 4,OOSSpìW=íî 在  内外 在  22ˆcosSS SdS r dSdrrq×W= W= =òò òò òò
+80
+
+--- Page 81 ---
+Thank You
+！
+81
+

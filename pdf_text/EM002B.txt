@@ -1,0 +1,26 @@
+=== EM002B ===
+Pages: 123
+
+--- Page 1 ---
+1
+电容（capacitance/capacity）量度储电能力（导体几何特性）电容器（capacitor）元件（储电、储能、频率效应等）
+
+--- Page 2 ---
+2人类的梦想---雷电能量的“捕捉和储存”
+
+
+--- Page 3 ---
+3
+一、孤立导体的电容
+0Q0j问题：设带电为Q0的孤立导体达到静电平衡时电势为φ0。如果导体带电为Q＝kQ0时，其电势φ多大？
+l全空间每一点的电势都变为原来k倍。l导体电势变为原来k倍，即有00QQjj=孤立导体的带电量与其电势成正比！
+0kQ0kj
+
+--- Page 122 ---
+What is Superfludity?Mordernview of superfluidity: emergent constant of motionSuperfluidis a natural low-T state of a classical complex-valued matter field, arising from an emergentconstant of motion—i.e., topologicalorder   ψ(!r)=ψ(!r)eiΦ(!r)Complex matter field:    !vs=γ ∇Φ     (γ="/m)Superfluid velocity field:
+Emergentconstant of motion: quantizedcirculationüleads to superfluidityücan be destroyed onlyby topologicaldefects (vortices)
+
+
+--- Page 123 ---
+近些年来，高温超导的研究成了世界各国科学家的一个热门课题，主要包括三个方面：[进一步寻找高临界参数的超导新材料[阐明高Tc氧化物超导体的物理机制；[开发新超导体的技术应用，如研制高Tc的高温氧化物超导实用线材或带材，发展制备高质量超导薄膜的技术，利用高温氧化物超导材料制造各种电子元件和器件等。
+

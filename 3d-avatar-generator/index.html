@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D形象生成器 · DeepSeek Style</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --panel-bg: #1a1a2e;
+      --text: #e0e0f0;
+      --accent: #4F6BED;
+      --accent-light: #7B93F7;
+      --accent-dark: #3B54C4;
+      --pink: #FF6B9D;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* === 整体布局 === */
+    #app {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* === 3D视口 === */
+    #viewport {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 70%);
+    }
+
+    #viewport canvas {
+      display: block;
+    }
+
+    /* 视口内提示 */
+    .viewport-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      pointer-events: none;
+      transition: opacity 1s;
+    }
+
+    /* === 侧边控制面板 === */
+    #panel {
+      width: 360px;
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .panel-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-light), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .panel-header .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    /* === 模板区域 === */
+    .section {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .template-cards {
+      display: flex;
+      gap: 10px;
+    }
+
+    .template-card {
+      flex: 1;
+      padding: 16px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-card:hover {
+      background: rgba(79, 107, 237, 0.1);
+      border-color: rgba(79, 107, 237, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 107, 237, 0.15);
+    }
+
+    .template-card.active {
+      background: rgba(79, 107, 237, 0.15);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79, 107, 237, 0.25);
+    }
+
+    .template-card .card-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .template-card .card-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .template-card .card-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    .template-card .badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(79, 107, 237, 0.3);
+      color: var(--accent-light);
+      margin-top: 6px;
+    }
+
+    /* === 描述输入 === */
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    #descInput {
+      flex: 1;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    #descInput:focus {
+      border-color: var(--accent);
+    }
+
+    #descInput::placeholder {
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* === 按钮 === */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      box-shadow: 0 4px 16px rgba(79, 107, 237, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* === 快捷标签 === */
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .tag:hover {
+      background: rgba(79, 107, 237, 0.2);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* === 当前参数显示 === */
+    #paramsDisplay {
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.6;
+    }
+
+    #paramsDisplay span {
+      display: inline-block;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin: 2px 3px;
+    }
+
+    /* === 响应式 === */
+    @media (max-width: 768px) {
+      #app {
+        flex-direction: column-reverse;
+      }
+      #panel {
+        width: 100%;
+        max-height: 45vh;
+      }
+      #viewport {
+        flex: 1;
+        min-height: 300px;
+      }
+    }
+
+    /* === 加载动画 === */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .generating {
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 3D 视口 -->
+    <div id="viewport">
+      <div class="viewport-hint" id="hint">🖱 拖拽旋转 · 滚轮缩放 · 右键平移</div>
+    </div>
+
+    <!-- 控制面板 -->
+    <div id="panel">
+      <div class="panel-header">
+        <h1>🎨 3D 形象生成器</h1>
+        <div class="subtitle">基于描述生成 3D 角色 · DeepSeek 风格范本</div>
+      </div>
+
+      <!-- 范本模板 -->
+      <div class="section">
+        <div class="section-title">📦 DeepSeek 范本</div>
+        <div class="template-cards">
+          <div class="template-card active" id="cardWhale" onclick="loadPreset('whale')">
+            <div class="card-icon">🐋</div>
+            <div class="card-label">动物形象</div>
+            <div class="card-desc">DeepSeek 鲸鱼</div>
+            <div class="badge">官方 mascot</div>
+          </div>
+          <div class="template-card" id="cardHumanoid" onclick="loadPreset('humanoid')">
+            <div class="card-icon">🧑‍🎤</div>
+            <div class="card-label">拟人形象</div>
+            <div class="card-desc">DeepSeek 风格</div>
+            <div class="badge">chibi 造型</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义生成 -->
+      <div class="section">
+        <div class="section-title">✨ 描述生成</div>
+        <div class="input-group">
+          <input type="text" id="descInput"
+            placeholder="例如：一只可爱的蓝色小猫">
+          <button class="btn btn-primary" onclick="generateFromDescription()">生成</button>
+        </div>
+        <div class="quick-tags">
+          <span class="tag" onclick="quickTag('可爱的红色狐狸')">🦊 可爱狐狸</span>
+          <span class="tag" onclick="quickTag('胖胖的熊猫')">🐼 胖熊猫</span>
+          <span class="tag" onclick="quickTag('帅气的紫色兔子')">🐰 帅气紫兔</span>
+          <span class="tag" onclick="quickTag('高大的绿色战士')">⚔️ 绿色战士</span>
+          <span class="tag" onclick="quickTag('金色的猫头鹰')">🦉 金猫头鹰</span>
+          <span class="tag" onclick="quickTag('粉色小精灵')">🧚 粉色精灵</span>
+        </div>
+        <div id="paramsDisplay"></div>
+      </div>
+
+      <!-- 操作 -->
+      <div class="section">
+        <button class="btn btn-ghost" onclick="resetCamera()" style="width:100%;">
+          📷 重置视角
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js Import Map -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ============================================================
+    // 场景初始化
+    // ============================================================
+    const viewport = document.getElementById('viewport');
+    const hint = document.getElementById('hint');
+
+    const scene = new THREE.Scene();
+
+    // 渲染器
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    viewport.appendChild(renderer.domElement);
+
+    // 相机
+    const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 50);
+    camera.position.set(3, 1.5, 5);
+    camera.lookAt(0, 0.3, 0);
+
+    // OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 0.3, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 2.5;
+    controls.maxDistance = 12;
+    controls.maxPolarAngle = Math.PI * 0.75;
+    controls.update();
+
+    // 隐藏初始提示
+    controls.addEventListener('start', () => { hint.style.opacity = '0'; });
+    controls.addEventListener('end', () => {
+      setTimeout(() => { hint.style.opacity = '1'; }, 2000);
+    });
+
+    // ============================================================
+    // 光照
+    // ============================================================
+    // 环境光
+    const ambient = new THREE.AmbientLight('#8899cc', 0.8);
+    scene.add(ambient);
+
+    // 半球光 (天空+地面)
+    const hemi = new THREE.HemisphereLight('#ccddff', '#443355', 0.5);
+    scene.add(hemi);
+
+    // 主光源 (带阴影)
+    const keyLight = new THREE.DirectionalLight('#ffffff', 2.5);
+    keyLight.position.set(5, 8, 5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 50;
+    keyLight.shadow.camera.left = -10;
+    keyLight.shadow.camera.right = 10;
+    keyLight.shadow.camera.top = 10;
+    keyLight.shadow.camera.bottom = -10;
+    keyLight.shadow.bias = -0.0001;
+    keyLight.shadow.normalBias = 0.02;
+    scene.add(keyLight);
+
+    // 补光
+    const fillLight = new THREE.DirectionalLight('#8899ff', 0.8);
+    fillLight.position.set(-3, 2, -2);
+    scene.add(fillLight);
+
+    // 轮廓光
+    const rimLight = new THREE.DirectionalLight('#ffaacc', 1.2);
+    rimLight.position.set(0, 1.5, -4);
+    scene.add(rimLight);
+
+    // ============================================================
+    // 地面
+    // ============================================================
+    const groundGeo = new THREE.PlaneGeometry(20, 20);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: '#1a1a30',
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -2.5;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // 装饰性光环
+    const ringGeo = new THREE.TorusGeometry(1.8, 0.02, 16, 80);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: '#4F6BED',
+      roughness: 0.3,
+      metalness: 0.8,
+      emissive: '#1a2a6c',
+      emissiveIntensity: 0.4,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = -1.8;
+    ring.receiveShadow = true;
+    scene.add(ring);
+
+    // ============================================================
+    // 粒子背景
+    // ============================================================
+    const particlesGeo = new THREE.BufferGeometry();
+    const particlesCount = 200;
+    const positions = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 1] = Math.random() * 6 - 1;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particlesMat = new THREE.PointsMaterial({
+      color: '#4F6BED',
+      size: 0.03,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const particles = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles);
+
+    // ============================================================
+    // 材质工厂
+    // ============================================================
+    function createToonMaterial(hexColor, options = {}) {
+      return new THREE.MeshToonMaterial({
+        color: new THREE.Color(hexColor),
+        roughness: options.roughness ?? 0.4,
+        metalness: options.metalness ?? 0.0,
+        ...options.extra,
+      });
+    }
+
+    function createStandardMaterial(hexColor, options = {}) {
+      return new THREE.MeshStandardMaterial({
+        color: new THREE.Color(hexColor),
+        roughness: options.roughness ?? 0.5,
+        metalness: options.metalness ?? 0.05,
+        ...options.extra,
+      });
+    }
+
+    // ============================================================
+    // 辅助函数：创建网格并设置阴影
+    // ============================================================
+    function createMesh(geometry, material, castShadow = true, receiveShadow = false) {
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = receiveShadow;
+      return mesh;
+    }
+
+    // ============================================================
+    // 当前角色引用
+    // ============================================================
+    let currentCharacter = null;
+
+    function clearCharacter() {
+      if (currentCharacter) {
+        // 递归清理
+        currentCharacter.traverse((child) => {
+          if (child.geometry && child.geometry !== groundGeo && child.geometry !== ringGeo) {
+            child.geometry.dispose();
+          }
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+            } else if (child.material !== groundMat && child.material !== ringMat) {
+              child.material.dispose();
+            }
+          }
+        });
+        scene.remove(currentCharacter);
+        currentCharacter = null;
+      }
+    }
+
+    function setCharacter(group) {
+      clearCharacter();
+      currentCharacter = group;
+      // 记录基础缩放，用于呼吸动画
+      group.userData._baseScale = group.scale.x;
+      scene.add(group);
+    }
+
+    // ============================================================
+    // 🐋 DeepSeek 鲸鱼形象
+    // ============================================================
+    function buildDeepSeekWhale(params = {}) {
+      const group = new THREE.Group();
+      const mainColor = params.mainColor || '#4F6BED';
+      const bellyColor = params.bellyColor || '#D6E0FF';
+      const finColor = params.finColor || '#3860D0';
+      const eyeColor = params.eyeColor || '#1a1a2e';
+
+      // 身体参数：sphere(1) 缩放 → (sx, sy, sz)
+      const sx = 1.15, sy = 0.80, sz = 1.45;
+      // 体表判定函数：在局部坐标 (x,y,z) 处，norm² = (x/sx)²+(y/sy)²+(z/sz)²
+      // norm² < 1 → 体内, = 1 → 表面, > 1 → 体外
+
+      // --- 身体 ---
+      const bodyGeo = new THREE.SphereGeometry(1, 52, 52);
+      const bodyMat = createToonMaterial(mainColor);
+      const body = createMesh(bodyGeo, bodyMat);
+      body.scale.set(sx, sy, sz);
+      group.add(body);
+
+      // --- 腹部 ---
+      const bellyGeo = new THREE.SphereGeometry(0.88, 40, 40);
+      const bellyMat = createToonMaterial(bellyColor, { roughness: 0.55 });
+      const belly = createMesh(bellyGeo, bellyMat);
+      belly.scale.set(0.95, 0.62, 1.05);
+      belly.position.set(0, -0.3, 0.05);
+      group.add(belly);
+
+      // --- 头部隆起 ---
+      const headGeo = new THREE.SphereGeometry(0.55, 40, 40);
+      const headMat = createToonMaterial(mainColor);
+      const head = createMesh(headGeo, headMat);
+      head.scale.set(1.0, 0.88, 0.9);
+      head.position.set(0, 0.1, 1.0);
+      group.add(head);
+
+      // --- 尾柄 ---
+      const peduncleGeo = new THREE.CylinderGeometry(0.15, 0.1, 0.6, 20);
+      const peduncleMat = createToonMaterial(mainColor);
+      const peduncle = createMesh(peduncleGeo, peduncleMat);
+      peduncle.position.set(0, 0.02, -1.6);
+      peduncle.rotation.x = Math.PI / 2;
+      group.add(peduncle);
+
+      // --- 尾鳍 ---
+      function createTailFluke(side) {
+        const g = new THREE.Group();
+        const geo = new THREE.SphereGeometry(0.28, 20, 20);
+        const mat = createToonMaterial(finColor);
+        const mesh = createMesh(geo, mat);
+        mesh.scale.set(0.1, 0.45, 0.35);
+        mesh.rotation.z = side * 0.65;
+        mesh.position.set(side * 0.25, 0.04, 0);
+        g.add(mesh);
+        return g;
+      }
+      const tailGroup = new THREE.Group();
+      tailGroup.add(createTailFluke(1));
+      tailGroup.add(createTailFluke(-1));
+      tailGroup.position.set(0, 0.03, -1.92);
+      group.add(tailGroup);
+
+      // --- 背鳍 ---
+      const dorsalGeo = new THREE.ConeGeometry(0.16, 0.35, 12, 6);
+      const dorsalMat = createToonMaterial(finColor);
+      const dorsal = createMesh(dorsalGeo, dorsalMat);
+      dorsal.position.set(0, 0.55, -0.2);
+      dorsal.rotation.x = -0.25;
+      dorsal.scale.set(1, 1, 0.45);
+      group.add(dorsal);
+
+      // --- 胸鳍 ---
+      function createPectoralFin(side) {
+        const g = new THREE.Group();
+        const geo = new THREE.SphereGeometry(0.25, 18, 18);
+        const mat = createToonMaterial(finColor);
+        const mesh = createMesh(geo, mat);
+        mesh.scale.set(0.07, 0.38, 0.5);
+        mesh.rotation.z = side * 0.5;
+        mesh.rotation.x = 0.4;
+        mesh.position.set(side * 0.12, -0.2, 0);
+        g.add(mesh);
+        g.position.set(side * 1.12, -0.2, 0.15);
+        return g;
+      }
+      group.add(createPectoralFin(1));
+      group.add(createPectoralFin(-1));
+
+      // --- 眼睛 ---
+      // 关键：位置必须确保在身体表面之外
+      // 身体 surface 在 x=±0.82, y=0, z=1.2 处 norm² = (0.82/1.15)²+0+(1.2/1.45)² = 0.509+0.685 = 1.194 > 1
+      // 因此该点位于体外，眼睛完全可见
+      function createEye(side) {
+        const eyeG = new THREE.Group();
+
+        // 眼白（大圆球）
+        const wGeo = new THREE.SphereGeometry(0.16, 28, 28);
+        const wMat = createStandardMaterial('#ffffff', { roughness: 0.08 });
+        eyeG.add(createMesh(wGeo, wMat));
+
+        // 虹膜
+        const iGeo = new THREE.SphereGeometry(0.095, 22, 22);
+        const iMat = createStandardMaterial(eyeColor, { roughness: 0.08 });
+        const iris = createMesh(iGeo, iMat);
+        iris.position.z = 0.09;
+        eyeG.add(iris);
+
+        // 瞳孔
+        const pGeo = new THREE.SphereGeometry(0.05, 16, 16);
+        const pMat = createStandardMaterial('#000000', { roughness: 0.05 });
+        const pupil = createMesh(pGeo, pMat);
+        pupil.position.z = 0.14;
+        eyeG.add(pupil);
+
+        // 高光1（大）
+        const h1Geo = new THREE.SphereGeometry(0.035, 12, 12);
+        const h1Mat = createStandardMaterial('#ffffff', { roughness: 0.03 });
+        const h1 = createMesh(h1Geo, h1Mat);
+        h1.position.set(0.03, 0.05, 0.15);
+        eyeG.add(h1);
+
+        // 高光2（小）
+        const h2Geo = new THREE.SphereGeometry(0.02, 10, 10);
+        const h2Mat = createStandardMaterial('#ffffff', { roughness: 0.03 });
+        const h2 = createMesh(h2Geo, h2Mat);
+        h2.position.set(-0.04, -0.03, 0.14);
+        eyeG.add(h2);
+
+        // 位置：侧面偏前，确保在体表外
+        eyeG.position.set(side * 0.84, 0.0, 1.2);
+        eyeG.rotation.y = side * 0.55;
+        return eyeG;
+      }
+      group.add(createEye(1));
+      group.add(createEye(-1));
+
+      // --- 眉毛 ---
+      function createEyebrow(side) {
+        const geo = new THREE.BoxGeometry(0.22, 0.035, 0.05);
+        const mat = createToonMaterial('#2C3E80');
+        const brow = createMesh(geo, mat);
+        brow.position.set(side * 0.84, 0.2, 1.18);
+        brow.rotation.z = side * -0.2;
+        brow.rotation.y = side * 0.55;
+        return brow;
+      }
+      group.add(createEyebrow(1));
+      group.add(createEyebrow(-1));
+
+      // --- 嘴巴 ---
+      const mouthGeo = new THREE.TorusGeometry(0.11, 0.025, 8, 14, Math.PI);
+      const mouthMat = createStandardMaterial('#3B3B5C', { roughness: 0.3 });
+      const mouth = createMesh(mouthGeo, mouthMat);
+      mouth.position.set(0, -0.18, 1.2);
+      mouth.rotation.z = Math.PI;
+      group.add(mouth);
+
+      // --- 腮红 ---
+      function createBlush(side) {
+        const geo = new THREE.CircleGeometry(0.09, 18);
+        const mat = new THREE.MeshBasicMaterial({
+          color: '#FF8FAA', transparent: true, opacity: 0.35,
+          side: THREE.DoubleSide, depthWrite: false,
+        });
+        const blush = new THREE.Mesh(geo, mat);
+        blush.position.set(side * 0.72, -0.1, 1.17);
+        blush.rotation.y = side * 0.55;
+        return blush;
+      }
+      group.add(createBlush(1));
+      group.add(createBlush(-1));
+
+      // --- 喷水孔 ---
+      const bhGeo = new THREE.CylinderGeometry(0.05, 0.07, 0.12, 14);
+      const bhMat = createToonMaterial('#3860D0');
+      const blowhole = createMesh(bhGeo, bhMat);
+      blowhole.position.set(0, 0.68, 0.55);
+      group.add(blowhole);
+
+      // --- 喷水粒子 ---
+      const sprayGroup = new THREE.Group();
+      for (let i = 0; i < 10; i++) {
+        const dGeo = new THREE.SphereGeometry(0.035, 8, 8);
+        const dMat = new THREE.MeshBasicMaterial({
+          color: '#AACCFF', transparent: true, opacity: 0.5, depthWrite: false,
+        });
+        const drop = new THREE.Mesh(dGeo, dMat);
+        drop.position.set(
+          (Math.random() - 0.5) * 0.25,
+          0.08 + Math.random() * 0.4,
+          (Math.random() - 0.5) * 0.25
+        );
+        drop.userData = {
+          baseY: drop.position.y,
+          speed: 0.6 + Math.random() * 1.5,
+          phase: Math.random() * Math.PI * 2,
+        };
+        sprayGroup.add(drop);
+      }
+      sprayGroup.position.set(0, 0.75, 0.55);
+      group.add(sprayGroup);
+      group.userData.sprayGroup = sprayGroup;
+
+      group.position.set(0, 0.15, 0);
+      group.userData.type = 'whale';
+      group.userData.params = params;
+      return group;
+    }
+
+    // ============================================================
+    // 🧑‍🎤 DeepSeek 拟人形象 (Chibi风格)
+    // ============================================================
+    function buildDeepSeekHumanoid(params = {}) {
+      const group = new THREE.Group();
+      const skinColor = params.skinColor || '#FFD5C2';
+      const hairColor = params.hairColor || '#2C3E80';
+      const outfitColor = params.outfitColor || '#4F6BED';
+      const outfitAccent = params.outfitAccent || '#FFFFFF';
+      const eyeColor = params.eyeColor || '#4F6BED';
+
+      // --- 头部 ---
+      const headGeo = new THREE.SphereGeometry(0.48, 40, 40);
+      const headMat = createToonMaterial(skinColor, { roughness: 0.6 });
+      const head = createMesh(headGeo, headMat);
+      head.scale.set(1, 1.05, 0.9);
+      head.position.y = 1.35;
+      group.add(head);
+
+      // --- 身体 ---
+      const bodyGeo = new THREE.CylinderGeometry(0.32, 0.38, 0.6, 32);
+      const bodyMat = createToonMaterial(outfitColor);
+      const body = createMesh(bodyGeo, bodyMat);
+      body.position.y = 0.72;
+      group.add(body);
+
+      // --- 衣领装饰 ---
+      const collarGeo = new THREE.TorusGeometry(0.34, 0.04, 8, 24);
+      const collarMat = createToonMaterial(outfitAccent, { roughness: 0.3 });
+      const collar = createMesh(collarGeo, collarMat);
+      collar.position.y = 1.05;
+      collar.rotation.x = Math.PI / 2;
+      group.add(collar);
+
+      // --- 领结 ---
+      const bowCenterGeo = new THREE.SphereGeometry(0.06, 16, 16);
+      const bowCenterMat = createToonMaterial('#FF6B9D');
+      const bowCenter = createMesh(bowCenterGeo, bowCenterMat);
+      bowCenter.position.set(0, 1.02, 0.3);
+      group.add(bowCenter);
+
+      function createBowWing(side) {
+        const wingGeo = new THREE.BoxGeometry(0.08, 0.12, 0.04);
+        const wingMat = createToonMaterial('#FF6B9D');
+        const wing = createMesh(wingGeo, wingMat);
+        wing.position.set(side * 0.1, 1.02, 0.3);
+        wing.rotation.z = side * 0.8;
+        return wing;
+      }
+      group.add(createBowWing(1));
+      group.add(createBowWing(-1));
+
+      // --- 头发 ---
+      function buildHair() {
+        const hairGroup = new THREE.Group();
+
+        // 主发体（覆盖后脑和头顶的大球体）
+        const mainHairGeo = new THREE.SphereGeometry(0.5, 40, 40);
+        const mainHairMat = createToonMaterial(hairColor, { roughness: 0.5 });
+        const mainHair = createMesh(mainHairGeo, mainHairMat);
+        mainHair.scale.set(1.05, 1.0, 1.0);
+        mainHair.position.y = 1.42;
+        mainHair.position.z = -0.05;
+        hairGroup.add(mainHair);
+
+        // 刘海（前额发片）
+        for (let i = -2; i <= 2; i++) {
+          const bangGeo = new THREE.BoxGeometry(0.14, 0.2, 0.08);
+          const bangMat = createToonMaterial(hairColor, { roughness: 0.5 });
+          const bang = createMesh(bangGeo, bangMat);
+          bang.position.set(i * 0.13, 1.62, 0.4);
+          bang.rotation.x = 0.2;
+          bang.rotation.z = i * 0.15;
+          hairGroup.add(bang);
+        }
+
+        // 侧发
+        function createSideHair(side) {
+          const sideGeo = new THREE.BoxGeometry(0.1, 0.35, 0.12);
+          const sideMat = createToonMaterial(hairColor, { roughness: 0.5 });
+          const sideHair = createMesh(sideGeo, sideMat);
+          sideHair.position.set(side * 0.5, 1.3, -0.05);
+          sideHair.rotation.z = side * 0.2;
+          return sideHair;
+        }
+        hairGroup.add(createSideHair(1));
+        hairGroup.add(createSideHair(-1));
+
+        // 呆毛
+        const ahogeGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.25, 12);
+        const ahogeMat = createToonMaterial(hairColor, { roughness: 0.5 });
+        const ahoge = createMesh(ahogeGeo, ahogeMat);
+        ahoge.position.set(0.05, 1.85, 0.1);
+        ahoge.rotation.z = 0.3;
+        ahoge.rotation.x = 0.2;
+        hairGroup.add(ahoge);
+
+        // 呆毛顶端小球
+        const ahogeTipGeo = new THREE.SphereGeometry(0.04, 12, 12);
+        const ahogeTip = createMesh(ahogeTipGeo, ahogeMat);
+        ahogeTip.position.set(0.08, 1.96, 0.18);
+        hairGroup.add(ahogeTip);
+
+        return hairGroup;
+      }
+      group.add(buildHair());
+
+      // --- 眼睛（二次元大眼） ---
+      function createAnimeEye(side) {
+        const eyeGroup = new THREE.Group();
+
+        // 眼白
+        const whiteGeo = new THREE.SphereGeometry(0.1, 24, 24);
+        const whiteMat = createStandardMaterial('#ffffff', { roughness: 0.05 });
+        const white = createMesh(whiteGeo, whiteMat);
+        white.scale.set(0.7, 1.1, 0.5);
+        eyeGroup.add(white);
+
+        // 虹膜（大！）
+        const irisGeo = new THREE.SphereGeometry(0.07, 20, 20);
+        const irisMat = createStandardMaterial(eyeColor, { roughness: 0.05 });
+        const iris = createMesh(irisGeo, irisMat);
+        iris.position.z = 0.05;
+        iris.scale.set(0.7, 1.0, 0.5);
+        eyeGroup.add(iris);
+
+        // 瞳孔
+        const pupilGeo = new THREE.SphereGeometry(0.035, 16, 16);
+        const pupilMat = createStandardMaterial('#111111', { roughness: 0.05 });
+        const pupil = createMesh(pupilGeo, pupilMat);
+        pupil.position.z = 0.08;
+        eyeGroup.add(pupil);
+
+        // 高光（两个，二次元风格）
+        const hl1Geo = new THREE.SphereGeometry(0.025, 12, 12);
+        const hl1Mat = createStandardMaterial('#ffffff', { roughness: 0.05 });
+        const hl1 = createMesh(hl1Geo, hl1Mat);
+        hl1.position.set(0.02, 0.03, 0.09);
+        eyeGroup.add(hl1);
+
+        const hl2Geo = new THREE.SphereGeometry(0.015, 10, 10);
+        const hl2Mat = createStandardMaterial('#ffffff', { roughness: 0.05 });
+        const hl2 = createMesh(hl2Geo, hl2Mat);
+        hl2.position.set(-0.03, -0.02, 0.09);
+        eyeGroup.add(hl2);
+
+        eyeGroup.position.set(side * 0.2, 1.5, 0.38);
+        eyeGroup.rotation.y = side * 0.2;
+        return eyeGroup;
+      }
+      group.add(createAnimeEye(1));
+      group.add(createAnimeEye(-1));
+
+      // --- 眉毛 ---
+      function createAnimeBrow(side) {
+        const browGeo = new THREE.BoxGeometry(0.13, 0.02, 0.03);
+        const browMat = createToonMaterial('#3C2A1E');
+        const brow = createMesh(browGeo, browMat);
+        brow.position.set(side * 0.2, 1.62, 0.38);
+        brow.rotation.z = side * -0.15;
+        return brow;
+      }
+      group.add(createAnimeBrow(1));
+      group.add(createAnimeBrow(-1));
+
+      // --- 鼻子 ---
+      const noseGeo = new THREE.SphereGeometry(0.03, 12, 12);
+      const noseMat = createToonMaterial('#F0C0A0');
+      const nose = createMesh(noseGeo, noseMat);
+      nose.position.set(0, 1.38, 0.43);
+      group.add(nose);
+
+      // --- 嘴巴 ---
+      const mouthGeo = new THREE.TorusGeometry(0.04, 0.012, 6, 10, Math.PI);
+      const mouthMat = createStandardMaterial('#D4786E', { roughness: 0.3 });
+      const animeMouth = createMesh(mouthGeo, mouthMat);
+      animeMouth.position.set(0, 1.3, 0.42);
+      animeMouth.rotation.z = Math.PI;
+      group.add(animeMouth);
+
+      // --- 腮红 ---
+      function createAnimeBlush(side) {
+        const blushGeo = new THREE.CircleGeometry(0.07, 16);
+        const blushMat = new THREE.MeshBasicMaterial({
+          color: '#FFAABB',
+          transparent: true,
+          opacity: 0.35,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const blush = new THREE.Mesh(blushGeo, blushMat);
+        blush.position.set(side * 0.28, 1.33, 0.39);
+        blush.rotation.y = side * 0.2;
+        return blush;
+      }
+      group.add(createAnimeBlush(1));
+      group.add(createAnimeBlush(-1));
+
+      // --- 手臂 ---
+      function createArm(side) {
+        const armGroup = new THREE.Group();
+
+        const upperGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.45, 20);
+        const upperMat = createToonMaterial(outfitColor);
+        const upper = createMesh(upperGeo, upperMat);
+        upper.position.y = -0.2;
+        armGroup.add(upper);
+
+        // 手
+        const handGeo = new THREE.SphereGeometry(0.08, 16, 16);
+        const handMat = createToonMaterial(skinColor, { roughness: 0.6 });
+        const hand = createMesh(handGeo, handMat);
+        hand.position.y = -0.48;
+        armGroup.add(hand);
+
+        armGroup.position.set(side * 0.55, 0.87, 0);
+        armGroup.rotation.z = side * 0.35;
+        armGroup.rotation.x = -0.3;
+        return armGroup;
+      }
+      group.add(createArm(1));
+      group.add(createArm(-1));
+
+      // --- 腿部 ---
+      function createLeg(side) {
+        const legGroup = new THREE.Group();
+
+        const legGeo = new THREE.CylinderGeometry(0.09, 0.1, 0.55, 20);
+        const legMat = createToonMaterial('#3B3B5C');
+        const leg = createMesh(legGeo, legMat);
+        legGroup.add(leg);
+
+        // 鞋子
+        const shoeGeo = new THREE.BoxGeometry(0.16, 0.1, 0.2);
+        const shoeMat = createToonMaterial('#2C2C4A', { roughness: 0.4 });
+        const shoe = createMesh(shoeGeo, shoeMat);
+        shoe.position.set(0, -0.3, 0.06);
+        shoe.rotation.x = -0.1;
+        legGroup.add(shoe);
+
+        legGroup.position.set(side * 0.2, 0.38, 0);
+        return legGroup;
+      }
+      group.add(createLeg(1));
+      group.add(createLeg(-1));
+
+      // --- 围巾（DeepSeek蓝） ---
+      const scarfGeo = new THREE.TorusGeometry(0.36, 0.05, 8, 32);
+      const scarfMat = createToonMaterial('#5B7BED', { roughness: 0.4 });
+      const scarf = createMesh(scarfGeo, scarfMat);
+      scarf.position.y = 1.0;
+      scarf.rotation.x = Math.PI / 2;
+      group.add(scarf);
+
+      // --- 围巾飘带 ---
+      const scarfTailGeo = new THREE.BoxGeometry(0.08, 0.35, 0.04);
+      const scarfTailMat = createToonMaterial('#5B7BED', { roughness: 0.4 });
+      const scarfTail = createMesh(scarfTailGeo, scarfTailMat);
+      scarfTail.position.set(-0.28, 0.7, 0.15);
+      scarfTail.rotation.z = 0.6;
+      scarfTail.rotation.x = 0.3;
+      group.add(scarfTail);
+
+      // --- DeepSeek徽章 ---
+      const badgeGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 24);
+      const badgeMat = createStandardMaterial('#FFD700', {
+        roughness: 0.2,
+        metalness: 0.8,
+        extra: { emissive: '#332200', emissiveIntensity: 0.3 },
+      });
+      const badge = createMesh(badgeGeo, badgeMat);
+      badge.position.set(0.15, 0.9, 0.3);
+      group.add(badge);
+
+      // --- 耳机 ---
+      function createHeadphone(side) {
+        const padGeo = new THREE.CylinderGeometry(0.11, 0.11, 0.06, 20);
+        const padMat = createToonMaterial('#3B3B5C', { roughness: 0.3 });
+        const pad = createMesh(padGeo, padMat);
+        pad.rotation.z = Math.PI / 2;
+        pad.position.set(side * 0.52, 1.35, 0);
+        return pad;
+      }
+      group.add(createHeadphone(1));
+      group.add(createHeadphone(-1));
+
+      // 耳机头梁
+      const bandGeo = new THREE.TorusGeometry(0.5, 0.03, 8, 16, Math.PI);
+      const bandMat = createToonMaterial('#3B3B5C', { roughness: 0.3 });
+      const band = createMesh(bandGeo, bandMat);
+      band.position.set(0, 1.85, 0);
+      band.rotation.y = Math.PI / 2;
+      group.add(band);
+
+      // 整体位置
+      group.position.set(0, 0.15, 0);
+      group.userData.type = 'humanoid';
+      group.userData.params = params;
+
+      return group;
+    }
+
+    // ============================================================
+    // 🎨 描述解析与通用角色生成
+    // ============================================================
+    const ANIMAL_TYPES = {
+      '鲸鱼': 'whale', '鲸': 'whale',
+      '猫': 'cat', '小猫': 'cat', '猫咪': 'cat',
+      '狗': 'dog', '小狗': 'dog', '狗狗': 'dog',
+      '兔子': 'rabbit', '兔': 'rabbit', '小兔': 'rabbit',
+      '熊': 'bear', '熊猫': 'panda',
+      '狐狸': 'fox', '狐': 'fox',
+      '鸟': 'bird', '猫头鹰': 'owl', '鹰': 'eagle',
+      '龙': 'dragon', '鱼': 'fish',
+      '仓鼠': 'hamster', '鼠': 'mouse',
+      '企鹅': 'penguin', '海豚': 'dolphin', 'dolphin': 'dolphin',
+      '青蛙': 'frog', '猪': 'pig',
+      '小鸡': 'chick', '鸡': 'chicken',
+    };
+
+    const COLOR_MAP = {
+      '蓝': '#4F6BED', '蓝色': '#4F6BED', '天蓝': '#5DADE2', '深蓝': '#2C3E80',
+      '红': '#E74C3C', '红色': '#E74C3C', '大红': '#C0392B',
+      '绿': '#2ECC71', '绿色': '#2ECC71', '翠绿': '#1ABC9C',
+      '粉': '#FF69B4', '粉色': '#FF69B4', '粉红': '#FF85A2',
+      '紫': '#9B59B6', '紫色': '#9B59B6', '淡紫': '#C39BD3',
+      '黄': '#F1C40F', '黄色': '#F1C40F', '金': '#FFD700', '金色': '#FFD700',
+      '白': '#FFFFFF', '白色': '#ECF0F1',
+      '黑': '#2C3E50', '黑色': '#2C3E50', '暗黑': '#1a1a2e',
+      '橙': '#E67E22', '橙色': '#E67E22', '橘': '#F39C12',
+      '灰': '#95A5A6', '灰色': '#95A5A6', '银': '#BDC3C7',
+    };
+
+    const FEATURE_MODIFIERS = {
+      '可爱': { eyeScale: 1.3, headScale: 1.15, bodyRoundness: 1.2, expression: 'happy' },
+      '萌': { eyeScale: 1.4, headScale: 1.2, bodyRoundness: 1.25, expression: 'happy' },
+      '帅气': { eyeScale: 0.85, bodyShape: 'athletic', expression: 'cool' },
+      '酷': { eyeScale: 0.8, bodyShape: 'athletic', expression: 'cool' },
+      '胖': { bodyWidth: 1.35, bodyRoundness: 1.3 },
+      '胖胖': { bodyWidth: 1.45, bodyRoundness: 1.4 },
+      '瘦': { bodyWidth: 0.72, bodyRoundness: 0.8 },
+      '高': { bodyHeight: 1.25 },
+      '高大': { bodyHeight: 1.35, bodyWidth: 1.1 },
+      '矮': { bodyHeight: 0.75 },
+      '小': { overallScale: 0.8 },
+      '迷你': { overallScale: 0.65 },
+      '巨大': { overallScale: 1.4 },
+      '优雅': { bodyShape: 'slim', expression: 'gentle' },
+      '凶': { eyeScale: 0.7, expression: 'angry' },
+      '温柔': { eyeScale: 1.1, expression: 'gentle' },
+    };
+
+    const ACCESSORIES = {
+      '帽子': 'hat',
+      '眼镜': 'glasses',
+      '蝴蝶结': 'bow',
+      '围巾': 'scarf',
+      '皇冠': 'crown',
+      '耳机': 'headphone',
+      '翅膀': 'wings',
+    };
+
+    function parseDescription(text) {
+      const result = {
+        animalType: null,
+        isHumanoid: false,
+        mainColor: '#4F6BED',
+        accentColor: '#FFFFFF',
+        features: {},
+        accessories: [],
+        raw: text,
+      };
+
+      const lower = text.toLowerCase();
+
+      // 检测是否拟人
+      if (/人|拟人|角色|人物|战士|精灵|法师|骑士|少女|少年|男孩|女孩/.test(text)) {
+        result.isHumanoid = true;
+      }
+
+      // 检测动物类型
+      for (const [keyword, type] of Object.entries(ANIMAL_TYPES)) {
+        if (text.includes(keyword)) {
+          result.animalType = type;
+          break;
+        }
+      }
+
+      // 检测颜色
+      for (const [keyword, color] of Object.entries(COLOR_MAP)) {
+        if (text.includes(keyword)) {
+          result.mainColor = color;
+          break;
+        }
+      }
+
+      // 检测特征
+      for (const [keyword, modifiers] of Object.entries(FEATURE_MODIFIERS)) {
+        if (text.includes(keyword)) {
+          Object.assign(result.features, modifiers);
+        }
+      }
+
+      // 检测配饰
+      for (const [keyword, accessory] of Object.entries(ACCESSORIES)) {
+        if (text.includes(keyword)) {
+          result.accessories.push(accessory);
+        }
+      }
+
+      return result;
+    }
+
+    // ============================================================
+    // 通用动物角色构建器
+    // ============================================================
+    function buildAnimalCharacter(params) {
+      const group = new THREE.Group();
+      const color = params.mainColor;
+      const animalType = params.animalType || 'whale';
+      const features = params.features || {};
+
+      // 不同动物的身体比例（sphere半径1，scale到这些值）
+      const bodyConfigs = {
+        whale:   { sx: 1.1, sy: 0.78, sz: 1.4, ear: null,          headOfs: 0.95, tail: false },
+        cat:     { sx: 0.7, sy: 0.78, sz: 0.82, ear: 'triangle',   headOfs: 0.55, tail: true },
+        dog:     { sx: 0.72, sy: 0.78, sz: 0.85, ear: 'floppy',    headOfs: 0.58, tail: true },
+        rabbit:  { sx: 0.62, sy: 0.82, sz: 0.72, ear: 'long',      headOfs: 0.5,  tail: false },
+        bear:    { sx: 0.88, sy: 0.85, sz: 0.9,  ear: 'round',     headOfs: 0.68, tail: false },
+        fox:     { sx: 0.62, sy: 0.72, sz: 0.85, ear: 'triangle',  headOfs: 0.6,  tail: true },
+        panda:   { sx: 0.85, sy: 0.82, sz: 0.88, ear: 'round',     headOfs: 0.65, tail: false },
+        owl:     { sx: 0.5,  sy: 0.8,  sz: 0.6,  ear: null,        headOfs: 0.45, tail: false },
+        hamster: { sx: 0.5,  sy: 0.6,  sz: 0.55, ear: 'small_round', headOfs: 0.38, tail: false },
+        penguin: { sx: 0.55, sy: 0.9,  sz: 0.6,  ear: null,        headOfs: 0.48, tail: false },
+        bird:    { sx: 0.45, sy: 0.6,  sz: 0.55, ear: null,        headOfs: 0.36, tail: false },
+        fish:    { sx: 0.42, sy: 0.5,  sz: 0.85, ear: null,        headOfs: 0.7,  tail: false },
+        dolphin: { sx: 0.9,  sy: 0.7,  sz: 1.3,  ear: null,        headOfs: 0.85, tail: false },
+      };
+
+      const cfg = bodyConfigs[animalType] || bodyConfigs.whale;
+      const bw = features.bodyWidth || 1.0;
+      const bh = features.bodyHeight || 1.0;
+      const br = features.bodyRoundness || 1.0;
+      const headScale = features.headScale || 1.0;
+      const eyeScale = features.eyeScale || 1.0;
+
+      const bodySX = cfg.sx * bw * br;
+      const bodySY = cfg.sy * bh;
+      const bodySZ = cfg.sz * br;
+
+      // --- 身体 ---
+      const bodyGeo = new THREE.SphereGeometry(1, 44, 44);
+      const bodyMat = createToonMaterial(color);
+      const bodyMesh = createMesh(bodyGeo, bodyMat);
+      bodyMesh.scale.set(bodySX, bodySY, bodySZ);
+      group.add(bodyMesh);
+
+      // --- 腹部 ---
+      const bellyGeo = new THREE.SphereGeometry(0.82, 32, 32);
+      const bellyHex = '#' + new THREE.Color(color).multiplyScalar(1.35).getHexString();
+      const bellyMat = createToonMaterial(bellyHex, { roughness: 0.55 });
+      const bellyMesh = createMesh(bellyGeo, bellyMat);
+      bellyMesh.scale.set(bodySX * 0.76, bodySY * 0.68, bodySZ * 0.66);
+      bellyMesh.position.y = -0.18;
+      group.add(bellyMesh);
+
+      // --- 头部（放在身体前端，确保突出于体表） ---
+      const headGeo = new THREE.SphereGeometry(0.5, 38, 38);
+      const headMat = createToonMaterial(color);
+      const headMesh = createMesh(headGeo, headMat);
+      const headRX = headScale;
+      const headRY = headScale * 0.88;
+      const headRZ = headScale * 0.82;
+      headMesh.scale.set(headRX, headRY, headRZ);
+      // 头部z位置：身体前端(bodySZ*br) 减去 头部半径一小部分，让头部前半突出
+      const headZ = bodySZ - headRZ * 0.35;
+      headMesh.position.set(0, 0.2, headZ);
+      group.add(headMesh);
+
+      // 头部前端z坐标
+      const headFrontZ = headZ + headRZ;
+
+      // --- 眼睛（确保在头部表面外侧） ---
+      function createAnimalEye(side) {
+        const eyeG = new THREE.Group();
+
+        // 眼白
+        const ewR = 0.105 * eyeScale;
+        const wGeo = new THREE.SphereGeometry(ewR, 22, 22);
+        const wMat = createStandardMaterial('#ffffff', { roughness: 0.08 });
+        eyeG.add(createMesh(wGeo, wMat));
+
+        // 虹膜
+        const irR = 0.062 * eyeScale;
+        const iGeo = new THREE.SphereGeometry(irR, 18, 18);
+        const iMat = createStandardMaterial('#1a1a2e', { roughness: 0.08 });
+        const iris = createMesh(iGeo, iMat);
+        iris.position.z = ewR * 0.55;
+        eyeG.add(iris);
+
+        // 瞳孔
+        const pGeo = new THREE.SphereGeometry(irR * 0.5, 14, 14);
+        const pMat = createStandardMaterial('#000000', { roughness: 0.05 });
+        const pupil = createMesh(pGeo, pMat);
+        pupil.position.z = ewR * 0.78;
+        eyeG.add(pupil);
+
+        // 高光
+        const hGeo = new THREE.SphereGeometry(ewR * 0.2, 10, 10);
+        const hMat = createStandardMaterial('#ffffff', { roughness: 0.03 });
+        const hl = createMesh(hGeo, hMat);
+        hl.position.set(ewR * 0.2, ewR * 0.3, ewR * 0.85);
+        eyeG.add(hl);
+
+        // 眼睛位置：在头部前端表面
+        const eyeX = side * headRX * 0.72;
+        const eyeY = 0.3;
+        const eyeZ = headFrontZ - headRZ * 0.15;
+        eyeG.position.set(eyeX, eyeY, eyeZ);
+        eyeG.rotation.y = side * 0.3;
+        return eyeG;
+      }
+      group.add(createAnimalEye(1));
+      group.add(createAnimalEye(-1));
+
+      // --- 嘴巴 ---
+      const mouthGeo = new THREE.TorusGeometry(0.06, 0.015, 6, 10, Math.PI);
+      const mouthMat = createStandardMaterial('#3B3B5C', { roughness: 0.3 });
+      const mouthMesh = createMesh(mouthGeo, mouthMat);
+      mouthMesh.position.set(0, 0.1, headFrontZ - headRZ * 0.1);
+      mouthMesh.rotation.z = Math.PI;
+      group.add(mouthMesh);
+
+      // --- 腮红 ---
+      function createAnimalBlush(side) {
+        const geo = new THREE.CircleGeometry(0.06, 14);
+        const mat = new THREE.MeshBasicMaterial({
+          color: '#FFAABB', transparent: true, opacity: 0.3,
+          side: THREE.DoubleSide, depthWrite: false,
+        });
+        const blush = new THREE.Mesh(geo, mat);
+        blush.position.set(side * headRX * 0.55, 0.12, headFrontZ - headRZ * 0.08);
+        blush.rotation.y = side * 0.3;
+        return blush;
+      }
+      group.add(createAnimalBlush(1));
+      group.add(createAnimalBlush(-1));
+
+      // --- 耳朵 ---
+      if (cfg.ear) {
+        const earGeoMap = {
+          triangle:    () => new THREE.ConeGeometry(0.1, 0.25, 10, 6),
+          floppy:      () => { const g = new THREE.SphereGeometry(0.11, 14, 14); return g; },
+          long:        () => new THREE.CylinderGeometry(0.05, 0.07, 0.38, 10),
+          round:       () => new THREE.SphereGeometry(0.12, 14, 14),
+          small_round: () => new THREE.SphereGeometry(0.08, 10, 10),
+        };
+        const earFactory = earGeoMap[cfg.ear] || earGeoMap.round;
+        for (const side of [-1, 1]) {
+          const eGeo = earFactory();
+          const eMat = createToonMaterial(color);
+          const ear = createMesh(eGeo, eMat);
+          ear.position.set(side * headRX * 0.7, 0.55, headZ + headRZ * 0.1);
+          if (cfg.ear === 'floppy') {
+            ear.scale.set(0.6, 1.2, 0.4);
+            ear.position.y -= 0.1;
+          }
+          if (cfg.ear === 'long') {
+            ear.rotation.z = side * 0.35;
+            ear.position.y += 0.1;
+          }
+          group.add(ear);
+        }
+      }
+
+      // --- 尾巴 ---
+      if (cfg.tail) {
+        const tGeo = new THREE.CylinderGeometry(0.035, 0.07, 0.5, 10);
+        const tMat = createToonMaterial(color);
+        const tail = createMesh(tGeo, tMat);
+        tail.position.set(0, 0.05, -bodySZ * 0.75);
+        tail.rotation.x = -0.7;
+        group.add(tail);
+      }
+
+      // --- 腿（四足动物） ---
+      if (['cat', 'dog', 'fox', 'bear', 'panda', 'rabbit', 'hamster'].includes(animalType)) {
+        function createLeg(lx, lz) {
+          const lGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.25, 12);
+          const lMat = createToonMaterial(color);
+          const leg = createMesh(lGeo, lMat);
+          leg.position.set(lx, -bodySY * 0.72, lz);
+          return leg;
+        }
+        const lOffX = bodySX * 0.5;
+        const lOffZ = bodySZ * 0.45;
+        group.add(createLeg( lOffX,  lOffZ));
+        group.add(createLeg(-lOffX,  lOffZ));
+        group.add(createLeg( lOffX, -lOffZ));
+        group.add(createLeg(-lOffX, -lOffZ));
+      }
+
+      // --- 鳍（水生动物） ---
+      if (['whale', 'fish', 'dolphin'].includes(animalType)) {
+        for (const side of [-1, 1]) {
+          const fGeo = new THREE.SphereGeometry(0.2, 16, 16);
+          const fMat = createToonMaterial(color);
+          const fin = createMesh(fGeo, fMat);
+          fin.scale.set(0.06, 0.3, 0.4);
+          fin.position.set(side * bodySX * 1.05, -bodySY * 0.3, bodySZ * 0.1);
+          fin.rotation.z = side * 0.7;
+          fin.rotation.x = 0.5;
+          group.add(fin);
+        }
+        // 尾鳍
+        const tfGeo = new THREE.SphereGeometry(0.22, 14, 14);
+        const tfMat = createToonMaterial(color);
+        const tailFin = createMesh(tfGeo, tfMat);
+        tailFin.scale.set(0.08, 0.35, 0.3);
+        tailFin.position.set(0, 0, -bodySZ * 0.95);
+        group.add(tailFin);
+        // 背鳍
+        const dfGeo = new THREE.ConeGeometry(0.1, 0.25, 8, 4);
+        const dfMat = createToonMaterial(color);
+        const dorsalFin = createMesh(dfGeo, dfMat);
+        dorsalFin.position.set(0, bodySY * 0.7, -bodySZ * 0.1);
+        dorsalFin.rotation.x = -0.3;
+        dorsalFin.scale.set(1, 1, 0.4);
+        group.add(dorsalFin);
+      }
+
+      // --- 翅膀（鸟类） ---
+      if (['owl', 'bird'].includes(animalType)) {
+        for (const side of [-1, 1]) {
+          const wGeo = new THREE.SphereGeometry(0.2, 16, 16);
+          const wMat = createToonMaterial(color);
+          const wing = createMesh(wGeo, wMat);
+          wing.scale.set(0.08, 0.5, 0.35);
+          wing.position.set(side * bodySX * 1.05, 0.05, 0);
+          wing.rotation.z = side * 0.8;
+          group.add(wing);
+        }
+      }
+
+      // --- 蝴蝶结配饰 ---
+      if (params.accessories && params.accessories.includes('bow')) {
+        const bowG = new THREE.Group();
+        const cGeo = new THREE.SphereGeometry(0.04, 10, 10);
+        const cMat = createToonMaterial('#FF6B9D');
+        bowG.add(createMesh(cGeo, cMat));
+        for (const s of [-1, 1]) {
+          const wGeo = new THREE.BoxGeometry(0.07, 0.12, 0.025);
+          const w = createMesh(wGeo, cMat);
+          w.position.set(s * 0.08, 0, 0);
+          w.rotation.z = s * 0.5;
+          bowG.add(w);
+        }
+        bowG.position.set(0, 0.55, headFrontZ - headRZ * 0.3);
+        group.add(bowG);
+      }
+
+      group.position.y = 0.15;
+      group.userData.type = animalType;
+      group.userData.params = params;
+      return group;
+    }
+
+    // ============================================================
+    // 通用拟人角色构建器
+    // ============================================================
+    function buildGenericHumanoid(params) {
+      const copyParams = { ...params };
+      if (!copyParams.outfitColor) copyParams.outfitColor = params.mainColor;
+      if (!copyParams.hairColor) {
+        // 头发颜色比主色深一些
+        const base = new THREE.Color(params.mainColor);
+        const hsl = {};
+        base.getHSL(hsl);
+        // 降低明度，保持饱和度
+        const hairCol = new THREE.Color().setHSL(hsl.h, Math.min(hsl.s * 1.1, 1), Math.max(hsl.l * 0.45, 0.1));
+        copyParams.hairColor = '#' + hairCol.getHexString();
+      }
+      if (!copyParams.skinColor) copyParams.skinColor = '#FFD5C2';
+      return buildDeepSeekHumanoid(copyParams);
+    }
+
+    // ============================================================
+    // 主生成函数
+    // ============================================================
+    function generateCharacter(description) {
+      const params = parseDescription(description);
+      updateParamsDisplay(params);
+
+      let character;
+      if (params.isHumanoid) {
+        character = buildGenericHumanoid(params);
+      } else if (params.animalType) {
+        character = buildAnimalCharacter(params);
+      } else {
+        // 默认：根据描述中的特征决定
+        // 如果提到了人的特征，生成拟人；否则生成动物
+        character = buildDeepSeekWhale(params);
+      }
+
+      // 应用整体缩放
+      if (params.features.overallScale) {
+        character.scale.setScalar(params.features.overallScale);
+      }
+
+      setCharacter(character);
+    }
+
+    // ============================================================
+    // UI更新
+    // ============================================================
+    function updateParamsDisplay(params) {
+      const display = document.getElementById('paramsDisplay');
+      const parts = [];
+      if (params.animalType) parts.push(`类型: ${params.animalType}`);
+      if (params.isHumanoid) parts.push('形态: 拟人');
+      parts.push(`主色: ${params.mainColor}`);
+      if (params.accessories.length > 0) parts.push(`配饰: ${params.accessories.join(', ')}`);
+      const featKeys = Object.keys(params.features);
+      if (featKeys.length > 0) parts.push(`特征: ${featKeys.join(', ')}`);
+
+      display.innerHTML = parts.map(p => `<span>${p}</span>`).join(' ');
+    }
+
+    function setActiveCard(type) {
+      document.getElementById('cardWhale').classList.toggle('active', type === 'whale');
+      document.getElementById('cardHumanoid').classList.toggle('active', type === 'humanoid');
+    }
+
+    // ============================================================
+    // 全局函数暴露
+    // ============================================================
+    window.loadPreset = function(type) {
+      setActiveCard(type);
+      if (type === 'whale') {
+        setCharacter(buildDeepSeekWhale());
+        updateParamsDisplay({ animalType: 'whale', mainColor: '#4F6BED',
+          features: { expression: 'happy' }, accessories: [], isHumanoid: false });
+      } else if (type === 'humanoid') {
+        setCharacter(buildDeepSeekHumanoid());
+        updateParamsDisplay({ isHumanoid: true, mainColor: '#4F6BED',
+          features: {}, accessories: ['headphone', 'bow', 'scarf'] });
+      }
+    };
+
+    window.generateFromDescription = function() {
+      const input = document.getElementById('descInput');
+      const text = input.value.trim();
+      if (!text) {
+        // 输入为空时抖动提示
+        input.style.borderColor = '#E74C3C';
+        setTimeout(() => { input.style.borderColor = ''; }, 600);
+        return;
+      }
+      setActiveCard(null);
+      generateCharacter(text);
+    };
+
+    window.quickTag = function(text) {
+      document.getElementById('descInput').value = text;
+      setActiveCard(null);
+      generateCharacter(text);
+    };
+
+    window.resetCamera = function() {
+      camera.position.set(3, 1.5, 5);
+      controls.target.set(0, 0.3, 0);
+      controls.update();
+    };
+
+    // 回车键触发生成
+    document.getElementById('descInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        window.generateFromDescription();
+      }
+    });
+
+    // ============================================================
+    // 响应式处理
+    // ============================================================
+    function resize() {
+      const rect = viewport.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height);
+      camera.aspect = rect.width / Math.max(rect.height, 1);
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+
+    // ============================================================
+    // 动画循环
+    // ============================================================
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const dt = Math.min(clock.getDelta(), 0.1);
+      const time = performance.now() * 0.001;
+
+      controls.update();
+
+      // 光环缓慢旋转
+      ring.rotation.z += dt * 0.3;
+
+      // 粒子动画
+      particles.rotation.y += dt * 0.08;
+      particles.rotation.x += dt * 0.04;
+
+      // 角色动画
+      if (currentCharacter) {
+        // 呼吸动画：在基础缩放上叠加轻微呼吸效果
+        const baseScale = currentCharacter.userData._baseScale || 1;
+        const breathe = 1 + Math.sin(time * 2.5) * 0.012;
+        currentCharacter.scale.setScalar(baseScale * breathe);
+
+        // 鲸鱼喷水动画
+        if (currentCharacter.userData.sprayGroup) {
+          const spray = currentCharacter.userData.sprayGroup;
+          spray.children.forEach(drop => {
+            if (drop.userData.baseY !== undefined) {
+              drop.position.y = drop.userData.baseY +
+                Math.sin(time * drop.userData.speed * 3 + drop.userData.phase) * 0.15;
+              drop.material.opacity = 0.3 +
+                Math.sin(time * drop.userData.speed * 2 + drop.userData.phase) * 0.3;
+            }
+          });
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // ============================================================
+    // 启动
+    // ============================================================
+    resize();
+    // 默认加载鲸鱼
+    window.loadPreset('whale');
+    animate();
+
+    console.log('🐋 3D形象生成器已就绪');
+    console.log('  - DeepSeek 鲸鱼形象 (动物范本)');
+    console.log('  - DeepSeek 拟人形象 (人物范本)');
+    console.log('  - 支持文字描述生成自定义3D形象');
+    console.log('  🖱 鼠标拖拽旋转 | 滚轮缩放 | 右键平移');
+  </script>
+</body>
+</html>

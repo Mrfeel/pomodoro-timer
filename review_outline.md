@@ -1,0 +1,422 @@
+# 电磁学复习提纲
+
+**杨思辰  PB25992094  未来技术学院  物理学专业**
+
+教材：胡友秋等《电磁学》（科学出版社，2024）
+
+> 本提纲覆盖第1–10章核心内容，按知识模块组织。每章包含：知识框架、核心公式、典型例题、自测习题。习题风格参考课后作业。
+
+\newpage
+# 第一章  真空中的静电场
+
+## 一、知识框架
+
+1. **电荷守恒定律**：孤立系统总电荷不变
+2. **库仑定律**：$\boldsymbol{F}_{12} = \frac{1}{4\pi\varepsilon_0}\frac{q_1 q_2}{r_{12}^2}\hat{\boldsymbol{r}}_{12}$
+3. **电场强度**：$\boldsymbol{E} = \boldsymbol{F}/q_0$
+4. **叠加原理**：$\boldsymbol{E} = \sum_i \boldsymbol{E}_i$
+5. **高斯定理**：$\oint_S \boldsymbol{E}\cdot d\boldsymbol{S} = Q/\varepsilon_0$
+6. **环路定理**：$\oint_L \boldsymbol{E}\cdot d\boldsymbol{l} = 0$（静电场无旋）
+7. **电势**：$\varphi(\boldsymbol{r}) = \int_{\boldsymbol{r}}^{\infty}\boldsymbol{E}\cdot d\boldsymbol{l}$，$\boldsymbol{E} = -\nabla\varphi$
+
+## 二、核心公式速查
+
+| 带电体类型 | 电场强度 | 电势 |
+|-----------|---------|------|
+| 点电荷 | $\frac{q}{4\pi\varepsilon_0 r^2}\hat{\boldsymbol{r}}$ | $\frac{q}{4\pi\varepsilon_0 r}$ |
+| 无限长均匀带电直线 | $\frac{\lambda}{2\pi\varepsilon_0 r}$ | —（对数发散）|
+| 无限大均匀带电平面 | $\frac{\sigma}{2\varepsilon_0}$ | —（线性发散）|
+| 均匀带电球面(外) | $\frac{Q}{4\pi\varepsilon_0 r^2}$ | $\frac{Q}{4\pi\varepsilon_0 r}$ |
+| 均匀带电球面(内) | $0$ | $\frac{Q}{4\pi\varepsilon_0 R}$（等势）|
+| 均匀带电球体(外) | $\frac{Q}{4\pi\varepsilon_0 r^2}$ | $\frac{Q}{4\pi\varepsilon_0 r}$ |
+| 均匀带电球体(内) | $\frac{Qr}{4\pi\varepsilon_0 R^3}$ | $\frac{Q(3R^2-r^2)}{8\pi\varepsilon_0 R^3}$ |
+| 电偶极子(轴线上) | $\frac{2p}{4\pi\varepsilon_0 r^3}$ | $\frac{p\cos\theta}{4\pi\varepsilon_0 r^2}$ |
+
+## 三、重点方法
+
+1. **对称性+高斯定理**：球对称、柱对称、面对称时直接用高斯定理求 $\boldsymbol{E}$
+2. **叠加法**：将带电体分割为点电荷/线电荷/面电荷元，积分叠加
+3. **电势法**：先求 $\varphi$ 再求 $\boldsymbol{E} = -\nabla\varphi$（标量积分比矢量积分简单）
+4. **电偶极子近似**：远场展开，$\varphi \propto 1/r^2$，$E \propto 1/r^3$
+
+## 四、自测习题
+
+**T1-1**：半径为 $R$ 的均匀带电半圆环，线电荷密度为 $\lambda$，求圆心处的电场强度。
+
+**T1-2**：证明无限大均匀带电平面两侧的电场大小为 $\sigma/(2\varepsilon_0)$，方向垂直于平面。
+
+**T1-3**：一均匀带电球体（半径 $R$，电荷体密度 $\rho$）内有一球形空腔（半径 $r_0$，球心距原球心 $\boldsymbol{a}$）。证明空腔内电场为匀强电场，$\boldsymbol{E} = \frac{\rho}{3\varepsilon_0}\boldsymbol{a}$。
+
+**T1-4**：计算电偶极子在均匀外电场 $\boldsymbol{E}_0$ 中所受的力矩，并讨论平衡的稳定性。
+
+**T1-5**：一无限长均匀带电圆柱面（半径 $R$，面电荷密度 $\sigma$），求柱内外电场分布及电势分布（以柱面为参考点）。
+
+\newpage
+# 第二章  静电场中的导体和电介质
+
+## 一、知识框架
+
+### 2.1 静电场中的导体
+1. **静电平衡条件**：导体内部 $\boldsymbol{E}=0$，导体表面 $\boldsymbol{E} \perp$ 表面
+2. **导体性质**：等势体，电荷只分布在表面，表面 $E=\sigma/\varepsilon_0$
+3. **静电屏蔽**：导体空腔屏蔽外部电场；接地空腔屏蔽内部电场
+4. **电容**：$C=Q/U$。孤立导体球 $C=4\pi\varepsilon_0 R$
+5. **电容器**：平行板 $C=\varepsilon_0 S/d$；球形 $C=4\pi\varepsilon_0\frac{ab}{b-a}$；圆柱形 $C=\frac{2\pi\varepsilon_0 l}{\ln(b/a)}$
+
+### 2.2 电介质
+1. **极化强度**：$\boldsymbol{P} = \sum_i \boldsymbol{p}_i / \Delta V$
+2. **极化电荷**：$\rho' = -\nabla\cdot\boldsymbol{P}$，$\sigma' = \boldsymbol{P}\cdot\hat{\boldsymbol{n}}$
+3. **电位移矢量**：$\boldsymbol{D} = \varepsilon_0\boldsymbol{E} + \boldsymbol{P}$，$\oint\boldsymbol{D}\cdot d\boldsymbol{S} = Q_f$（仅与自由电荷有关）
+4. **本构关系**（各向同性线性介质）：$\boldsymbol{P} = \chi_e\varepsilon_0\boldsymbol{E}$，$\boldsymbol{D} = \varepsilon_0\varepsilon_r\boldsymbol{E}$，$\varepsilon_r = 1+\chi_e$
+5. **边界条件**：$D_{1n}-D_{2n}=\sigma_f$，$E_{1t}=E_{2t}$；折射定律 $\frac{\tan\theta_1}{\tan\theta_2}=\frac{\varepsilon_1}{\varepsilon_2}$
+6. **唯一性定理**：给定导体上的电荷或电势+边界条件，静电场的解唯一
+
+## 二、重点方法
+
+1. **镜像法**：平面/球面导体边界的等效处理
+2. **$\boldsymbol{D}$ 法向连续+$\boldsymbol{E}$ 切向连续**：分区均匀介质中逐区求解
+3. **电容计算**：设电荷 $Q$ → 求 $\boldsymbol{E}$ → 积分得 $U$ → $C=Q/U$
+4. **唯一性定理应用**：猜解+验证边界条件的解题技巧
+
+## 三、自测习题
+
+**T2-1**：一平行板电容器极板面积 $S$、间距 $d$，插入厚度为 $t$、相对介电常数为 $\varepsilon_r$ 的介质板（与极板平行）。求插入前后的电容变化。
+
+**T2-2**：一半径为 $a$ 的导体球带电荷 $Q$，球外紧包一层厚度为 $d$、相对介电常数为 $\varepsilon_r$ 的均匀介质壳。求：(1) 介质内外的 $\boldsymbol{D}$ 和 $\boldsymbol{E}$；(2) 球心的电势。
+
+**T2-3**：一点电荷 $q$ 置于距无限大接地导体平面 $d$ 处。用电像法求：(1) 导体表面的感应电荷面密度分布；(2) 点电荷所受的力。
+
+**T2-4**：一同轴圆柱形电容器，内半径 $a$、外半径 $b$、长 $l$，其间一半填充 $\varepsilon_r$ 的介质（轴向分界面），一半为真空。求电容。
+
+**T2-5**：证明在两种电介质的交界面上，若无自由面电荷，则 $D$ 线的折射满足 $\varepsilon_1\cot\theta_1 = \varepsilon_2\cot\theta_2$。
+
+\newpage
+# 第三章  静电能
+
+## 一、知识框架
+
+1. **点电荷系统相互作用能**：$W = \frac{1}{2}\sum_{i} q_i \varphi_i$（$\varphi_i$ 为其他电荷在 $q_i$ 处产生的电势）
+2. **连续电荷分布静电能**：$W = \frac{1}{2}\int_V \rho\varphi\,dV = \frac{1}{2}\int_S \sigma\varphi\,dS$
+3. **电容器储能**：$W = \frac{1}{2}QU = \frac{1}{2}CU^2 = \frac{Q^2}{2C}$
+4. **电场能量密度**：$w_e = \frac{1}{2}\boldsymbol{D}\cdot\boldsymbol{E} = \frac{1}{2}\varepsilon_0\varepsilon_r E^2$
+5. **虚功原理求静电力**：$\boldsymbol{F} = -\nabla W|_{\text{const}}$（等电荷/等电势条件选择）
+
+## 二、核心公式对照
+
+| 条件 | 静电力公式 |
+|------|-----------|
+| 电荷不变（孤立导体） | $F = -\left.\frac{\partial W}{\partial x}\right|_Q$ |
+| 电势不变（接电源） | $F = +\left.\frac{\partial W}{\partial x}\right|_U$ |
+
+## 三、自测习题
+
+**T3-1**：一平行板电容器极板面积 $S$、间距 $x$、电压 $U$（接电源）。求两极板间的吸引力。若撤去电源后求吸引力，结果是否相同？
+
+**T3-2**：半径为 $R$ 的均匀带电球面，总电荷为 $Q$。求其静电自能，并由自能求电子的"经典半径"。
+
+**T3-3**：两同心导体球壳半径分别为 $a$ 和 $b$ ($a<b$)，分别带电荷 $+Q$ 和 $-Q$。求系统的总静电能，并验证 $W=Q^2/(2C)$。
+
+**T3-4**：利用虚功原理求均匀带电肥皂泡（半径 $R$，总电荷 $Q$）因静电斥力而受到的附加压强。
+
+\newpage
+# 第四章  稳恒电流
+
+## 一、知识框架
+
+1. **电流密度**：$\boldsymbol{j} = nq\boldsymbol{v}_d = \rho\boldsymbol{v}$；$I = \int_S \boldsymbol{j}\cdot d\boldsymbol{S}$
+2. **电流连续方程**：$\nabla\cdot\boldsymbol{j} + \frac{\partial\rho}{\partial t} = 0$
+3. **稳恒条件**：$\nabla\cdot\boldsymbol{j} = 0$（基尔霍夫第一定律的基础）
+4. **欧姆定律**：$\boldsymbol{j} = \sigma\boldsymbol{E}$（微分形式）；$U = IR$（积分形式）
+5. **电阻**：$R = \int \frac{dl}{\sigma S}$（均匀截面：$R = l/(\sigma S)$）
+6. **焦耳定律**：$p = \boldsymbol{j}\cdot\boldsymbol{E} = \sigma E^2 = j^2/\sigma$（功率密度）；$P = I^2 R = U^2/R$
+7. **电源电动势**：$\mathcal{E} = \oint \boldsymbol{K}\cdot d\boldsymbol{l}$（$\boldsymbol{K}$ 为非静电力）
+8. **基尔霍夫定律**：
+   - 第一定律（节点）：$\sum I_{\text{in}} = \sum I_{\text{out}}$
+   - 第二定律（回路）：$\sum \mathcal{E} = \sum IR$
+
+## 二、自测习题
+
+**T4-1**：一同轴电缆的内外导体半径分别为 $a$ 和 $b$，长为 $l$，其间充满电导率为 $\sigma$ 的导电介质。求两导体间的电阻。
+
+**T4-2**：证明在导电介质中，体电荷密度按指数衰减：$\rho(t) = \rho_0 e^{-t/\tau}$，其中 $\tau = \varepsilon/\sigma$（弛豫时间）。计算铜的 $\tau$（$\sigma=5.9\times 10^7\,\text{S/m}$）。
+
+**T4-3**：一电路如图所示，求各支路电流。已知 $\mathcal{E}_1=12\,\text{V}$，$\mathcal{E}_2=6\,\text{V}$，$R_1=R_2=2\,\Omega$，$R_3=4\,\Omega$。
+
+\newpage
+# 第五章  真空中的静磁场
+
+## 一、知识框架
+
+1. **磁感应强度 $\boldsymbol{B}$**：由运动电荷/电流在磁场中受力定义
+2. **洛伦兹力**：$\boldsymbol{F} = q(\boldsymbol{E} + \boldsymbol{v}\times\boldsymbol{B})$
+3. **毕奥-萨伐尔定律**：$d\boldsymbol{B} = \frac{\mu_0}{4\pi}\frac{I d\boldsymbol{l}\times\hat{\boldsymbol{r}}}{r^2}$
+4. **安培力**：$d\boldsymbol{F} = I d\boldsymbol{l}\times\boldsymbol{B}$
+5. **磁场高斯定理**：$\oint \boldsymbol{B}\cdot d\boldsymbol{S} = 0$（$\nabla\cdot\boldsymbol{B}=0$，无磁荷）
+6. **安培环路定理**：$\oint \boldsymbol{B}\cdot d\boldsymbol{l} = \mu_0 I_{\text{enc}}$（真空）
+7. **磁矢势**：$\boldsymbol{B} = \nabla\times\boldsymbol{A}$，$\nabla\cdot\boldsymbol{A}=0$（库仑规范）
+
+## 二、典型电流体系的磁场
+
+| 电流体系 | 磁场大小 |
+|---------|---------|
+| 无限长直导线 | $B = \frac{\mu_0 I}{2\pi r}$ |
+| 圆电流环中心 | $B = \frac{\mu_0 I}{2R}$ |
+| 圆电流环轴线上 | $B = \frac{\mu_0 I R^2}{2(R^2+z^2)^{3/2}}$ |
+| 长直螺线管内部 | $B = \mu_0 nI$ |
+| 螺绕环内部 | $B = \frac{\mu_0 NI}{2\pi r}$ |
+| 磁偶极子场 | $\boldsymbol{B} = \frac{\mu_0}{4\pi r^3}[3(\boldsymbol{m}\cdot\hat{\boldsymbol{r}})\hat{\boldsymbol{r}}-\boldsymbol{m}]$ |
+
+## 三、重点方法
+
+1. **对称性+安培环路定理**：与静电场高斯定理完全类比
+2. **毕奥-萨伐尔定律直接积分**：对称性不够时使用
+3. **磁矢势法**：$\boldsymbol{A} = \frac{\mu_0}{4\pi}\int\frac{\boldsymbol{j}}{r}dV$，再求 $\boldsymbol{B}=\nabla\times\boldsymbol{A}$
+4. **带电粒子在磁场中的运动**：回旋运动 $\omega_c = qB/m$，$r = mv_\perp/(qB)$
+
+## 四、自测习题
+
+**T5-1**：一半径为 $R$ 的圆形线圈载有电流 $I$。求轴线上距圆心 $z$ 处的 $\boldsymbol{B}$，并讨论 $z\gg R$ 时的渐近行为（磁偶极子近似）。
+
+**T5-2**：一无限长圆柱形导体（半径 $a$），电流 $I$ 均匀分布在截面上。求柱内外的 $\boldsymbol{B}$ 分布。
+
+**T5-3**：亥姆霍兹线圈：两共轴圆线圈半径均为 $R$，间距也为 $R$，同向电流 $I$。证明两线圈中点附近磁场最均匀（$dB/dz=0$，$d^2B/dz^2=0$）。
+
+**T5-4**：一宽为 $2a$ 的无限长薄导体板，载有沿长度方向的均匀电流 $I$（面电流密度均匀）。求板的中垂面上距板 $x$ 处的磁感应强度。
+
+**T5-5**：一质量为 $m$、电荷为 $q$ 的粒子以速度 $\boldsymbol{v}_0$ 垂直射入均匀磁场 $\boldsymbol{B}$。求粒子运动的轨迹方程、回旋半径和回旋频率。
+
+**T5-6**：利用安培环路定理和叠加原理，证明无限长螺线管内部磁场为 $B=\mu_0 nI$，外部磁场为零。
+
+\newpage
+# 第六章  静磁场中的磁介质
+
+## 一、知识框架
+
+1. **磁化强度**：$\boldsymbol{M} = \sum_i \boldsymbol{m}_i / \Delta V$
+2. **磁化电流**：体电流 $\boldsymbol{j}' = \nabla\times\boldsymbol{M}$；面电流 $\boldsymbol{i}' = \boldsymbol{M}\times\hat{\boldsymbol{n}}$
+3. **磁场强度**：$\boldsymbol{H} = \boldsymbol{B}/\mu_0 - \boldsymbol{M}$，$\oint\boldsymbol{H}\cdot d\boldsymbol{l} = I_f$（仅与自由电流有关）
+4. **本构关系**（各向同性线性介质）：$\boldsymbol{M} = \chi_m\boldsymbol{H}$，$\boldsymbol{B} = \mu_0(1+\chi_m)\boldsymbol{H} = \mu_0\mu_r\boldsymbol{H}$
+5. **边界条件**：$B_{1n}=B_{2n}$（法向连续）；$H_{1t}-H_{2t}=i_f$（切向差=面自由电流）
+6. **介质分类**：顺磁质（$\mu_r>1$）、抗磁质（$\mu_r<1$）、铁磁质（$\mu_r\gg 1$，非线性）
+
+## 二、与静电场的类比
+
+| 静电场 | 静磁场 |
+|--------|--------|
+| $\boldsymbol{D} = \varepsilon_0\boldsymbol{E}+\boldsymbol{P}$ | $\boldsymbol{H} = \boldsymbol{B}/\mu_0-\boldsymbol{M}$ |
+| $\oint\boldsymbol{D}\cdot d\boldsymbol{S} = Q_f$ | $\oint\boldsymbol{H}\cdot d\boldsymbol{l} = I_f$ |
+| $\sigma' = \boldsymbol{P}\cdot\hat{\boldsymbol{n}}$ | $\boldsymbol{i}' = \boldsymbol{M}\times\hat{\boldsymbol{n}}$ |
+| $\rho' = -\nabla\cdot\boldsymbol{P}$ | $\boldsymbol{j}' = \nabla\times\boldsymbol{M}$ |
+
+## 三、自测习题
+
+**T6-1**：一无限长直导线（半径 $a$）载有电流 $I$（均匀分布），外包一层磁导率为 $\mu$ 的介质（外半径 $b$）。求全空间的 $\boldsymbol{H}$ 和 $\boldsymbol{B}$，以及介质内外表面的磁化面电流。
+
+**T6-2**：一均匀磁化球（半径 $R$，磁化强度 $\boldsymbol{M}=M_0\hat{\boldsymbol{z}}$）。求球内外的 $\boldsymbol{B}$ 和 $\boldsymbol{H}$。（提示：类比均匀极化电介质球）
+
+**T6-3**：磁路定理：一铁芯环形螺线管（平均周长 $l$，截面积 $S$，相对磁导率 $\mu_r$，匝数 $N$）有一小气隙（长 $l_g$）。求气隙中的 $B$ 和线圈的自感 $L$。
+
+**T6-4**：一无限长磁介质圆柱（半径 $a$，磁导率 $\mu$）置于均匀外磁场 $\boldsymbol{B}_0$ 中，$\boldsymbol{B}_0 \perp$ 柱轴。证明柱内磁场是均匀的，并求柱内 $\boldsymbol{B}$。
+
+\newpage
+# 第七章  电磁感应
+
+## 一、知识框架
+
+### 7.1 法拉第电磁感应定律
+$$\mathcal{E} = -\frac{d\Phi}{dt}$$
+$\Phi = \int_S \boldsymbol{B}\cdot d\boldsymbol{S}$ 为通过回路面积的磁通量。负号即楞次定律：感应电流的磁通总是**反抗**原磁通的变化。
+
+### 7.2 动生电动势与感生电动势
+
+| 类型 | 机制 | 公式 | 特点 |
+|------|------|------|------|
+| 动生 | $\boldsymbol{v}\times\boldsymbol{B}$ | $\mathcal{E} = \oint(\boldsymbol{v}\times\boldsymbol{B})\cdot d\boldsymbol{l}$ | 导体在磁场中运动 |
+| 感生 | $\partial\boldsymbol{B}/\partial t$ | $\mathcal{E} = -\int_S\frac{\partial\boldsymbol{B}}{\partial t}\cdot d\boldsymbol{S}$ | 磁场随时间变化 |
+
+涡旋电场：$\nabla\times\boldsymbol{E} = -\partial\boldsymbol{B}/\partial t$（非保守场！$\oint\boldsymbol{E}\cdot d\boldsymbol{l} \neq 0$）
+
+### 7.3 互感和自感
+
+- **互感**：$M_{21} = \Psi_{21}/I_1$，$\mathcal{E}_2 = -M\,dI_1/dt$。$M_{12}=M_{21}$（对称性）
+- **自感**：$L = \Psi/I$，$\mathcal{E}_L = -L\,dI/dt$。$L$ 总能 $>0$
+- **串联**：顺串 $L_s = L_1+L_2+2M$；反串 $L_s = L_1+L_2-2M$
+- **耦合系数**：$k = M/\sqrt{L_1 L_2}$，$0 \leq k \leq 1$
+
+### 7.4 暂态过程
+
+| 电路 | 微分方程 | 解 | 时间常数 |
+|------|---------|-----|---------|
+| RL 充电 | $L\frac{dI}{dt}+RI=\mathcal{E}$ | $I=\frac{\mathcal{E}}{R}(1-e^{-t/\tau})$ | $\tau=L/R$ |
+| RC 放电 | $\frac{dq}{dt}+\frac{q}{RC}=0$ | $q=q_0 e^{-t/\tau}$ | $\tau=RC$ |
+| RLC 串联 | $L\frac{d^2q}{dt^2}+R\frac{dq}{dt}+\frac{q}{C}=0$ | 欠阻尼/临界/过阻尼 | $\omega_0=1/\sqrt{LC}$ |
+
+## 二、重点方法
+
+1. **$\mathcal{E} = -d\Phi/dt$ 直接法**：适于磁通量可简单表达的情况
+2. **动生+感生分解**：复杂情况下分别计算后叠加
+3. **基尔霍夫定律+电感**：暂态电路的基本方程
+4. **复数法**：交流稳态分析（$Z_L = j\omega L$，$Z_C = 1/(j\omega C)$）
+
+## 三、自测习题
+
+**T7-1**：一长直导线载有 $I = I_0\sin(\omega t)$，附近有一 $a\times b$ 的矩形线圈与导线共面，距导线 $d$。求线圈中的感应电动势。
+
+**T7-2**：一导体棒长 $l$，在均匀磁场 $\boldsymbol{B}$ 中以角速度 $\omega$ 绕一端旋转（$\boldsymbol{B}\perp$ 旋转平面）。求棒两端的感应电动势。
+
+**T7-3**：一长直螺线管（半径 $R$，$n$ 匝/米），通有 $I = I_0 e^{-\alpha t}$。求管内外的涡旋电场分布。
+
+**T7-4**：两线圈自感分别为 $L_1, L_2$，互感为 $M$。求顺串和反串时的等效自感。若两线圈同名端并联，求等效自感。
+
+**T7-5**：一 $RL$ 电路，$L=0.5\,\text{H}$，$R=10\,\Omega$，$\mathcal{E}=12\,\text{V}$。求：(1) 时间常数；(2) 电流达到稳态值 90% 所需时间；(3) 此时电感中储存的磁能。
+
+**T7-6**：一 $RLC$ 串联电路，$L=0.1\,\text{H}$，$C=10\,\mu\text{F}$。求：(1) 谐振频率；(2) 使电路处于临界阻尼的 $R$ 值；(3) 若 $R=50\,\Omega$，说明电路处于什么状态。
+
+**T7-7**：一边长为 $a$ 的正方形线圈（电阻 $R$），以恒定速度 $\boldsymbol{v}$ 穿过一宽度为 $a$ 的均匀磁场区域（$\boldsymbol{B}\perp$ 线圈平面）。定性画出线圈中感应电流随时间的变化曲线，并求外力做功的总能量。
+
+\newpage
+# 第八章  磁能
+
+## 一、知识框架
+
+1. **载流线圈磁能**：$W_m = \frac{1}{2}LI^2$（单线圈）；$W_m = \frac{1}{2}\sum_i L_i I_i^2 + \frac{1}{2}\sum_{i\neq j}M_{ij}I_i I_j$（多线圈）
+2. **磁场能量密度**：$w_m = \frac{1}{2}\boldsymbol{B}\cdot\boldsymbol{H} = \frac{B^2}{2\mu_0\mu_r}$
+3. **磁场总能**：$W_m = \int_V \frac{B^2}{2\mu_0\mu_r}\,dV$
+4. **虚功原理求磁力**：
+   - 磁链不变（$\Phi$ 不变）：$F = -\left.\frac{\partial W_m}{\partial x}\right|_\Phi$
+   - 电流不变（$I$ 不变）：$F = +\left.\frac{\partial W_m}{\partial x}\right|_I$
+5. **利用磁能求自感**：$L = 2W_m/I^2$（适用于对称性好的情况）
+
+## 二、与静电能的对称性
+
+| 静电能 | 磁能 |
+|--------|------|
+| $W_e = \frac{1}{2}QU$ | $W_m = \frac{1}{2}\Phi I$（单匝）|
+| $w_e = \frac{1}{2}\boldsymbol{D}\cdot\boldsymbol{E}$ | $w_m = \frac{1}{2}\boldsymbol{B}\cdot\boldsymbol{H}$ |
+| $C = 2W_e/U^2$ | $L = 2W_m/I^2$ |
+
+## 三、自测习题
+
+**T8-1**：一同轴电缆内导体半径 $a$、外导体内半径 $b$，通有电流 $I$（内导体均匀分布）。用磁能法求单位长度的自感。若内导体也是空心圆筒（半径 $a$），结果有何变化？
+
+**T8-2**：利用虚功原理求两平行无限长载流直导线（间距 $d$、电流 $I_1, I_2$）之间单位长度的作用力。并判断同向电流是吸引还是排斥。
+
+**T8-3**：一电磁铁铁芯截面积 $S$，气隙长度 $x$，线圈匝数 $N$，电流 $I$。忽略铁芯磁阻，用虚功原理求衔铁受到的吸力。
+
+**T8-4**：两同心共面圆线圈（半径 $a\ll b$），自感分别为 $L_a, L_b$，互感为 $M$。通有电流 $I_a, I_b$。求系统的总磁能。
+
+\newpage
+# 第九章  交流电路
+
+## 一、知识框架
+
+### 9.1 复数表示法
+
+- 电压：$\tilde{U} = U_m e^{j(\omega t+\varphi_u)}$，复有效值 $\dot{U} = \frac{U_m}{\sqrt{2}}e^{j\varphi_u}$
+- 复阻抗：电阻 $Z_R=R$；电感 $Z_L=j\omega L$；电容 $Z_C=\frac{1}{j\omega C} = -\frac{j}{\omega C}$
+- 欧姆定律（复数形式）：$\dot{U} = Z\dot{I}$
+- 串联：$Z = Z_1+Z_2+\cdots$；并联：$\frac{1}{Z} = \frac{1}{Z_1}+\frac{1}{Z_2}+\cdots$
+
+### 9.2 交流电功率
+
+- 瞬时功率：$p(t) = u(t)i(t)$
+- 平均功率（有功功率）：$P = UI\cos\varphi$（$\cos\varphi$ 为功率因数）
+- 视在功率：$S = UI$
+- 无功功率：$Q = UI\sin\varphi$
+- $\cos\varphi = R/|Z|$（串联），$\cos\varphi = |Z|/R$（并联）
+
+### 9.3 谐振
+
+- **串联谐振**：$\omega_0 = 1/\sqrt{LC}$，$Z_{\min}=R$（纯阻性），电流最大
+- **并联谐振**：$\omega_0 \approx 1/\sqrt{LC}$（高 $Q$ 时），$Z_{\max}$，电流最小
+- **品质因数**：$Q = \frac{\omega_0 L}{R} = \frac{1}{\omega_0 CR}$（串联）
+- **通频带**：$\Delta\omega = \omega_0/Q$
+
+## 二、自测习题
+
+**T9-1**：$L=0.2\,\text{H}$ 电感在 $f=50\,\text{Hz}$ 和 $f=1000\,\text{Hz}$ 下的阻抗各是多少？$C=5\,\mu\text{F}$ 电容呢？
+
+**T9-2**：RLC 串联电路，$R=50\,\Omega$，$L=0.2\,\text{H}$，$C=10\,\mu\text{F}$，接在 $U=220\,\text{V}$、$f=50\,\text{Hz}$ 的电源上。求：(1) 电流；(2) 功率因数；(3) 各元件上的电压。
+
+**T9-3**：求上题电路的谐振频率。在谐振频率下重求电流、功率因数和各元件电压。比较谐振与非谐振时的差异。
+
+**T9-4**：设计一 RLC 串联谐振电路，使其谐振频率为 $1000\,\text{Hz}$，$Q=50$。若 $C=1\,\mu\text{F}$，求 $L$ 和 $R$。
+
+**T9-5**：一变压器原线圈 500 匝，副线圈 50 匝。原线圈接 $220\,\text{V}$ 交流电源。求副线圈开路电压。若副线圈接 $10\,\Omega$ 负载，原线圈电流为多少？（忽略损耗）
+
+\newpage
+# 第十章  麦克斯韦电磁理论
+
+## 一、知识框架
+
+### 10.1 位移电流
+
+麦克斯韦对安培环路定理的修正：变化的电场也激发磁场。
+$$\oint_L \boldsymbol{H}\cdot d\boldsymbol{l} = I_f + \int_S \frac{\partial\boldsymbol{D}}{\partial t}\cdot d\boldsymbol{S}$$
+位移电流密度：$\boldsymbol{j}_D = \partial\boldsymbol{D}/\partial t$。注意：$\boldsymbol{j}_D$ 不是真实的电荷运动，但激发磁场的效应与真实电流相同。
+
+### 10.2 麦克斯韦方程组（真空中）
+
+| | 积分形式 | 微分形式 |
+|--|---------|---------|
+| 高斯定理 | $\oint\boldsymbol{D}\cdot d\boldsymbol{S}=Q_f$ | $\nabla\cdot\boldsymbol{D}=\rho_f$ |
+| 磁通连续 | $\oint\boldsymbol{B}\cdot d\boldsymbol{S}=0$ | $\nabla\cdot\boldsymbol{B}=0$ |
+| 法拉第定律 | $\oint\boldsymbol{E}\cdot d\boldsymbol{l}=-\int\frac{\partial\boldsymbol{B}}{\partial t}\cdot d\boldsymbol{S}$ | $\nabla\times\boldsymbol{E}=-\frac{\partial\boldsymbol{B}}{\partial t}$ |
+| 安培-麦克斯韦 | $\oint\boldsymbol{H}\cdot d\boldsymbol{l}=I_f+\int\frac{\partial\boldsymbol{D}}{\partial t}\cdot d\boldsymbol{S}$ | $\nabla\times\boldsymbol{H}=\boldsymbol{j}_f+\frac{\partial\boldsymbol{D}}{\partial t}$ |
+
+### 10.3 平面电磁波
+
+- 波动方程：$\nabla^2\boldsymbol{E} - \frac{1}{v^2}\frac{\partial^2\boldsymbol{E}}{\partial t^2}=0$，$v=1/\sqrt{\mu\varepsilon}$
+- 真空中 $c=1/\sqrt{\mu_0\varepsilon_0}\approx 3\times 10^8\,\text{m/s}$
+- 横波性：$\boldsymbol{k}\perp\boldsymbol{E}\perp\boldsymbol{B}$，且 $\boldsymbol{E}\perp\boldsymbol{B}$
+- 振幅关系：$E_0 = c B_0$（真空）
+- 坡印亭矢量：$\boldsymbol{S} = \boldsymbol{E}\times\boldsymbol{H}$（能流密度）
+- 坡印亭定理：$\nabla\cdot\boldsymbol{S} + \frac{\partial w}{\partial t} = -\boldsymbol{j}\cdot\boldsymbol{E}$（电磁场能量守恒）
+
+### 10.4 电磁场的动量与辐射压力
+
+- 动量密度：$\boldsymbol{g} = \boldsymbol{S}/c^2 = \varepsilon_0(\boldsymbol{E}\times\boldsymbol{B})$
+- 辐射压力（全吸收）：$p = I/c$；（全反射）：$p = 2I/c$
+
+## 二、自测习题
+
+**T10-1**：一平行板电容器（圆极板半径 $a$）充电，电压变化率 $dU/dt = k$。求极板间的位移电流密度以及距轴线 $r$ 处的磁感应强度。
+
+**T10-2**：铜的电导率 $\sigma = 5.9\times 10^7\,\text{S/m}$。在 $f=50\,\text{Hz}$ 和 $f=3\times 10^{11}\,\text{Hz}$ 时，分别计算铜导线中传导电流与位移电流的比值。说明了什么？
+
+**T10-3**：从麦克斯韦方程组出发，推导真空中电场和磁场满足的波动方程，并求出电磁波的传播速度。
+
+**T10-4**：一平面电磁波在真空中传播，电场振幅 $E_0=100\,\text{V/m}$。求：(1) 磁场振幅；(2) 平均坡印亭矢量大小；(3) 平均能量密度。
+
+**T10-5**：太阳常数（地球轨道处太阳辐射的能流密度）约为 $1.36\times 10^3\,\text{W/m}^2$。求：(1) 太阳光中电场和磁场的振幅；(2) 太阳光对地球表面（视为全吸收）的辐射压力。
+
+\newpage
+# 综合自测题
+
+以下题目覆盖多个章节的知识点，适合考前综合训练。
+
+**Z1（第1+2章综合）**：一导体球（半径 $a$，带电荷 $Q$）外有一同心介质球壳（内半径 $a$，外半径 $b$，相对介电常数 $\varepsilon_r$）。
+(1) 求全空间的 $\boldsymbol{D}$、$\boldsymbol{E}$、$\boldsymbol{P}$ 分布；
+(2) 求介质壳内外表面的极化电荷；
+(3) 求系统的电容。
+
+**Z2（第5+6章综合）**：一半径为 $R$ 的无限长磁介质圆柱（磁导率 $\mu$），沿轴向均匀磁化，磁化强度为 $\boldsymbol{M}$。
+(1) 求磁化电流分布；
+(2) 求柱内外的 $\boldsymbol{B}$ 和 $\boldsymbol{H}$；
+(3) 若在外部施加一均匀外磁场 $\boldsymbol{B}_0$（垂直于柱轴），求柱内 $\boldsymbol{B}$。
+
+**Z3（第7+8章综合）**：一同轴电缆内导体半径 $a$、外导体内半径 $b$，通有电流 $I$（内导体均匀分布，外导体集中在内表面）。
+(1) 求电缆单位长度的自感系数（分别用磁通法和磁能法）；
+(2) 若 $I = I_0\sin(\omega t)$，求单位长度的感应电动势（对单匝回路）；
+(3) 求单位长度的磁能。
+
+**Z4（第9+10章综合）**：一 RLC 串联电路（$R=20\,\Omega$，$L=50\,\text{mH}$，$C=2\,\mu\text{F}$）接在 $U=100\,\text{V}$、$f=1000\,\text{Hz}$ 的电源上。
+(1) 求电路中的电流和功率因数；
+(2) 求谐振频率和 $Q$ 值；
+(3) 该电路在开放空间可等效为电磁波发射天线。写出其辐射的电磁波的电场和磁场表达式（远场近似）。
+
+**Z5（第1+7+10章综合）**：一平行板电容器（极板面积 $S$、间距 $d$）通过电阻 $R$ 放电。初始电压为 $U_0$。
+(1) 求放电过程中的电流 $I(t)$ 和极板间电场 $E(t)$；
+(2) 求极板间位移电流密度和距中心 $r$ 处的磁感应强度 $B(r,t)$；
+(3) 求极板间坡印亭矢量 $\boldsymbol{S}$，并讨论能量流动的方向。
+

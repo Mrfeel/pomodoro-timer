@@ -1,0 +1,24 @@
+=== EM010A ===
+Pages: 75
+
+--- Page 1 ---
+1
+
+
+--- Page 2 ---
+2
+
+
+--- Page 3 ---
+3
+一、电磁现象的实验规律总结0a. 实物粒子的动力学方程（Newton 方程）dpFdt=0b. 洛伦兹力公式F qE qv B=+ ´ 0c. 电荷守恒定律【注】通常也将此式视为电场与磁场的定义！
+−𝑑𝑄内𝑑𝑡=&!⃑𝚥)𝑑⃑𝑆𝑜𝑟∇)⃑𝚥=−𝜕𝜌𝜕𝑡
+
+--- Page 74 ---
+29 members of the Cavendish have won Nobel prizes. Lord Rayleigh (Physics, 1904) Sir J.J. Thomson (Physics, 1906) Lord Ernest Rutherford (Chemistry, 1908) Sir Lawrence Bragg (Physics, 1915) Charles Barkla (Physics, 1917) Francis Aston (Chemistry, 1922) Charles Wilson (Physics, 1927) Arthur Compton (Physics, 1927) Sir Owen Richardson (Physics, 1928) Sir James Chadwick (Physics, 1935) Sir George Thomson (Physics, 1937) Sir Edward Appleton (Physics, 1947) Lord Patrick Blackett (Physics, 1948) Sir John Cockcroft (Physics, 1951) Ernest Walton (Physics, 1951) Francis Crick (Physiology or Medicine, 1962) James Watson (Physiology or Medicine, 1962) Max Perutz (Chemistry, 1962) Sir John Kendrew (Chemistry, 1962) Dorothy Hodgkin (Chemistry, 1964) Brian Josephson (Physics, 1973) Sir Martin Ryle (Physics, 1974) Anthony Hewish (Physics, 1974) Sir Nevill Mott (Physics, 1977) Philip Anderson (Physics, 1977) Pjotr Kapitsa (Physics, 1978) Allan Cormack (Physiology or Medicine, 1979) Sir Aaron Klug (Chemistry, 1982) Norman Ramsey (Physics, 1989)
+
+
+--- Page 75 ---
+75
+
+
