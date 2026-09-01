@@ -433,9 +433,10 @@
   }
   .float-text {
     position: fixed; z-index: 9999; pointer-events: none;
-    font-weight: 800; font-size: 1.35rem;
+    font-weight: 800; font-size: 1.2rem;
     color: var(--correct); text-shadow: 0 1px 6px rgba(0,0,0,0.35);
     transform: translate(-50%, -50%);
+    white-space: nowrap;
     animation: float-up 0.9s ease-out forwards;
   }
   @keyframes float-up {
@@ -569,22 +570,22 @@
   ];
 
   const CHARACTERS = [
-    { id: 'phantom', name: '魅影 Phantom', source: '《歌剧魅影》' },
-    { id: 'christine', name: '克里斯汀 Christine', source: '《歌剧魅影》' },
-    { id: 'valjean', name: '冉阿让 Jean Valjean', source: '《悲惨世界》' },
-    { id: 'fantine', name: '芳汀 Fantine', source: '《悲惨世界》' },
-    { id: 'cosette', name: '珂赛特 Cosette', source: '《悲惨世界》' },
-    { id: 'hamilton', name: '亚历山大·汉密尔顿', source: '《汉密尔顿》' },
-    { id: 'belle', name: '贝儿 Belle', source: '《美女与野兽》' },
-    { id: 'elphaba', name: '艾芙芭 Elphaba', source: '《魔法坏女巫》' },
-    { id: 'glinda', name: '葛琳达 Glinda', source: '《魔法坏女巫》' },
-    { id: 'marypoppins', name: '玛丽·波平斯', source: '《欢乐满人间》' },
-    { id: 'roxie', name: '罗克西 Roxie', source: '《芝加哥》' },
-    { id: 'evan', name: '埃文·汉森 Evan', source: '《致埃文·汉森》' },
-    { id: 'simba', name: '辛巴 Simba', source: '《狮子王》' },
-    { id: 'aladdin', name: '阿拉丁 Aladdin', source: '《阿拉丁》' },
-    { id: 'orpheus', name: '奥菲斯 Orpheus', source: '《冥界》' },
-    { id: 'euridice', name: '欧律狄刻 Eurydice', source: '《冥界》' },
+    { id: 'phantom', name: '魅影 Phantom', source: '《歌剧魅影》', colors: ['#c0392b', '#7f8c8d'] },
+    { id: 'christine', name: '克里斯汀 Christine', source: '《歌剧魅影》', colors: ['#2980b9', '#e84393'] },
+    { id: 'valjean', name: '冉阿让 Jean Valjean', source: '《悲惨世界》', colors: ['#8d6e63', '#c0392b'] },
+    { id: 'fantine', name: '芳汀 Fantine', source: '《悲惨世界》', colors: ['#2980b9', '#e74c3c'] },
+    { id: 'cosette', name: '珂赛特 Cosette', source: '《悲惨世界》', colors: ['#3498db', '#e67e22'] },
+    { id: 'hamilton', name: '亚历山大·汉密尔顿', source: '《汉密尔顿》', colors: ['#34495e', '#f1c40f'] },
+    { id: 'belle', name: '贝儿 Belle', source: '《美女与野兽》', colors: ['#f1c40f', '#e67e22'] },
+    { id: 'elphaba', name: '艾芙芭 Elphaba', source: '《魔法坏女巫》', colors: ['#27ae60', '#2c3e50'] },
+    { id: 'glinda', name: '葛琳达 Glinda', source: '《魔法坏女巫》', colors: ['#e84393', '#f8a5c2'] },
+    { id: 'marypoppins', name: '玛丽·波平斯', source: '《欢乐满人间》', colors: ['#2c3e50', '#c0392b'] },
+    { id: 'roxie', name: '罗克西 Roxie', source: '《芝加哥》', colors: ['#4a235a', '#e74c3c'] },
+    { id: 'evan', name: '埃文·汉森 Evan', source: '《致埃文·汉森》', colors: ['#2980b9', '#7f8c8d'] },
+    { id: 'simba', name: '辛巴 Simba', source: '《狮子王》', colors: ['#f39c12', '#e67e22'] },
+    { id: 'aladdin', name: '阿拉丁 Aladdin', source: '《阿拉丁》', colors: ['#8e44ad', '#e74c3c'] },
+    { id: 'orpheus', name: '奥菲斯 Orpheus', source: '《冥界》', colors: ['#8d6e63', '#f39c12'] },
+    { id: 'euridice', name: '欧律狄刻 Eurydice', source: '《冥界》', colors: ['#27ae60', '#f1c40f'] },
   ];  // ===== Q版小人图（手绘 SVG，随卡片一起展示） =====
   // ===== 状态 =====
   // ---- 主题 / 音效 / 难度（选择会被记住） ----
@@ -954,7 +955,8 @@
       sfxCorrect();
       const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
       if (slot) { slot.classList.remove('pop'); void slot.offsetWidth; slot.classList.add('pop'); }
-      if (slot) burstAt(slot);
+      const ch = CHARACTERS.find(function(c) { return c.id === charId; });
+      if (slot) burstAt(slot, ch && ch.colors, ch ? '✓ ' + ch.name.split(' ')[0] : '+1');
       const ms = DIFFS[difficulty].milestones;
       if (streak === ms[0]) {
         sfxMilestone();
@@ -1011,20 +1013,20 @@
     }
   }
 
-  function burstAt(el) {
+  function burstAt(el, colors, label) {
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const colors = ['var(--gold)', 'var(--cyan)', 'var(--purple)', 'var(--correct)', 'var(--accent)'];
-    for (let i = 0; i < 10; i++) {
+    const cols = colors && colors.length ? colors : ['var(--gold)', 'var(--cyan)', 'var(--purple)', 'var(--correct)', 'var(--accent)'];
+    for (let i = 0; i < 12; i++) {
       const p = document.createElement('div');
       p.className = 'burst-particle';
       const ang = Math.random() * Math.PI * 2;
       const dist = 28 + Math.random() * 48;
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
-      p.style.background = colors[i % colors.length];
+      p.style.background = cols[i % cols.length];
       p.style.setProperty('--dx', (Math.cos(ang) * dist) + 'px');
       p.style.setProperty('--dy', (Math.sin(ang) * dist) + 'px');
       document.body.appendChild(p);
@@ -1032,7 +1034,7 @@
     }
     const txt = document.createElement('div');
     txt.className = 'float-text';
-    txt.textContent = '+1';
+    txt.textContent = label || '+1';
     txt.style.left = cx + 'px';
     txt.style.top = (cy - 10) + 'px';
     document.body.appendChild(txt);

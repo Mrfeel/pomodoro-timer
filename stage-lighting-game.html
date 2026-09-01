@@ -218,9 +218,10 @@
   }
   .float-text {
     position: fixed; z-index: 9999; pointer-events: none;
-    font-weight: 800; font-size: 1.35rem;
+    font-weight: 800; font-size: 1.2rem;
     color: var(--correct); text-shadow: 0 1px 6px rgba(0,0,0,0.35);
     transform: translate(-50%, -50%);
+    white-space: nowrap;
     animation: float-up 0.9s ease-out forwards;
   }
   @keyframes float-up {
@@ -310,29 +311,29 @@
   // 每个灯具: { id, name, en, img(SVG), hint, answer }
   // 每个用途: { id, icon, title, desc }
   const LIGHTS = [
-    { id: 'l1', name: '追光灯', en: 'Followspot', answer: 'fx1', hint: '长筒造型，光束追人',
+    { id: 'l1', name: '追光灯', en: 'Followspot', answer: 'fx1', hint: '长筒造型，光束追人', colors: ['#ffd166', '#fff3c4'],
       img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="10" y="38" width="26" height="20" rx="4" fill="#e8e4d8"/><rect x="10" y="44" width="26" height="4" fill="#c9c2b4"/><path d="M36 44 L74 28 L74 68 L36 52 Z" fill="#ffd166" opacity="0.6"/><circle cx="26" cy="48" r="7" fill="#ffd166"/></svg>' },
-    { id: 'l2', name: '聚光灯', en: 'Spot', answer: 'fx2', hint: '锥形光束，集中一点',
+    { id: 'l2', name: '聚光灯', en: 'Spot', answer: 'fx2', hint: '锥形光束，集中一点', colors: ['#fff3c4', '#ffd166'],
       img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="12" y="40" width="22" height="16" rx="3" fill="#e8e4d8"/><path d="M34 47 L72 40 L72 56 L34 49 Z" fill="#fff3c4" opacity="0.85"/><circle cx="72" cy="48" r="5" fill="#fff3c4"/></svg>' },
-    { id: 'l3', name: '染色灯', en: 'Wash', answer: 'fx3', hint: '宽扁灯头，铺色均匀',
+    { id: 'l3', name: '染色灯', en: 'Wash', answer: 'fx3', hint: '宽扁灯头，铺色均匀', colors: ['#a29bfe', '#ff8fab'],
       img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="8" y="38" width="32" height="20" rx="6" fill="#e8e4d8"/><path d="M40 46 Q62 28 84 36 Q84 60 40 52 Z" fill="#a29bfe" opacity="0.55"/><rect x="36" y="52" width="6" height="14" rx="2" fill="#c9c2b4"/></svg>' },
-    { id: 'l4', name: '成像灯', en: 'Profile', answer: 'fx4', hint: '可投影花纹图案',
+    { id: 'l4', name: '成像灯', en: 'Profile', answer: 'fx4', hint: '可投影花纹图案', colors: ['#ff8fab', '#ffd166'],
       img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="10" y="40" width="26" height="16" rx="3" fill="#e8e4d8"/><path d="M36 46 L72 40 L72 56 L36 50 Z" fill="#ff8fab" opacity="0.5"/><path d="M60 44 l2.2 4.5 5-0.7 -3.6 3.5 1 4.9 -4.6-2.6 -4.6 2.6 1-4.9 -3.6-3.5 5 0.7z" fill="#ff8fab"/></svg>' },
-    { id: 'l5', name: '摇头灯', en: 'Moving Head', answer: 'fx5', hint: '灯头可自由旋转',
+    { id: 'l5', name: '摇头灯', en: 'Moving Head', answer: 'fx5', hint: '灯头可自由旋转', colors: ['#4ecdc4', '#ffd166'],
       img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="34" r="16" fill="#e8e4d8"/><circle cx="30" cy="34" r="7" fill="#4ecdc4"/><rect x="26" y="50" width="8" height="16" rx="2" fill="#c9c2b4"/><rect x="14" y="66" width="32" height="8" rx="3" fill="#2a2f3a"/><path d="M60 20 A22 22 0 0 1 60 48" stroke="#4ecdc4" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M60 20 l9 3 -3-8z" fill="#4ecdc4"/></svg>' },
-    { id: 'l6', name: 'PAR灯', en: 'PAR Can', answer: 'fx6', hint: '圆筒造型，光束强劲',
+    { id: 'l6', name: 'PAR灯', en: 'PAR Can', answer: 'fx6', hint: '圆筒造型，光束强劲', colors: ['#ffd166', '#fff3c4'],
       img: '<svg viewBox="0 0 96 96"><rect x="34" y="8" width="10" height="14" fill="#c9c2b4"/><circle cx="40" cy="50" r="28" fill="#2a2f3a"/><circle cx="40" cy="50" r="19" fill="#ffd166"/><circle cx="40" cy="50" r="19" fill="none" stroke="#e8e4d8" stroke-width="3"/><circle cx="40" cy="50" r="8" fill="#fff3c4"/></svg>' },
-    { id: 'l7', name: '频闪灯', en: 'Strobe', answer: 'fx7', hint: '闪电标记，高频闪光',
+    { id: 'l7', name: '频闪灯', en: 'Strobe', answer: 'fx7', hint: '闪电标记，高频闪光', colors: ['#ffd166', '#ff6b6b'],
       img: '<svg viewBox="0 0 96 96"><rect x="14" y="34" width="26" height="28" rx="5" fill="#e8e4d8"/><rect x="14" y="62" width="26" height="6" rx="2" fill="#c9c2b4"/><path d="M56 18 L36 46 L48 46 L40 74 L70 38 L56 38 Z" fill="#ffd166" stroke="#2a2f3a" stroke-width="2" stroke-linejoin="round"/></svg>' },
-    { id: 'l8', name: '柔光灯', en: 'Softlight', answer: 'fx8', hint: '柔光罩，光线柔和',
+    { id: 'l8', name: '柔光灯', en: 'Softlight', answer: 'fx8', hint: '柔光罩，光线柔和', colors: ['#fff3c4', '#ffd166'],
       img: '<svg viewBox="0 0 96 96"><rect x="10" y="34" width="34" height="28" rx="10" fill="#e8e4d8"/><rect x="12" y="38" width="30" height="20" rx="8" fill="#fffdf7"/><line x1="20" y1="43" x2="34" y2="43" stroke="#d4c9b8"/><line x1="20" y1="48" x2="34" y2="48" stroke="#d4c9b8"/><line x1="20" y1="53" x2="34" y2="53" stroke="#d4c9b8"/><path d="M44 44 Q70 40 82 47 Q70 54 44 50 Z" fill="#fff3c4" opacity="0.4"/></svg>' },
-    { id: 'l9', name: '激光灯', en: 'Laser', answer: 'fx9', hint: '多束细光柱',
+    { id: 'l9', name: '激光灯', en: 'Laser', answer: 'fx9', hint: '多束细光柱', colors: ['#ff6b6b', '#4ecdc4', '#a29bfe'],
       img: '<svg viewBox="0 0 96 96"><rect x="10" y="42" width="26" height="14" rx="4" fill="#e8e4d8"/><circle cx="18" cy="49" r="4" fill="#ff6b6b"/><path d="M36 45 L82 18" stroke="#ff6b6b" stroke-width="3" stroke-linecap="round"/><path d="M36 49 L86 46" stroke="#4ecdc4" stroke-width="3" stroke-linecap="round"/><path d="M36 53 L82 76" stroke="#a29bfe" stroke-width="3" stroke-linecap="round"/></svg>' },
-    { id: 'l10', name: 'LED灯带', en: 'LED Strip', answer: 'fx10', hint: '柔软可弯曲的灯条',
+    { id: 'l10', name: 'LED灯带', en: 'LED Strip', answer: 'fx10', hint: '柔软可弯曲的灯条', colors: ['#4ecdc4', '#ffd166'],
       img: '<svg viewBox="0 0 96 96"><path d="M10 40 Q30 24 50 40 T90 40" stroke="#4ecdc4" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M10 58 Q30 42 50 58 T90 58" stroke="#ffd166" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="10" cy="40" r="5" fill="#4ecdc4"/><circle cx="90" cy="40" r="5" fill="#4ecdc4"/><circle cx="10" cy="58" r="5" fill="#ffd166"/><circle cx="90" cy="58" r="5" fill="#ffd166"/></svg>' },
-    { id: 'l11', name: '回光灯', en: 'Fresnel', answer: 'fx11', hint: '同心圆纹路的透镜',
+    { id: 'l11', name: '回光灯', en: 'Fresnel', answer: 'fx11', hint: '同心圆纹路的透镜', colors: ['#fff3c4', '#c9a227'],
       img: '<svg viewBox="0 0 96 96"><circle cx="40" cy="46" r="28" fill="#2a2f3a"/><circle cx="40" cy="46" r="20" fill="#fff3c4"/><circle cx="40" cy="46" r="20" fill="none" stroke="#c9a227" stroke-width="2" stroke-dasharray="2 4"/><circle cx="40" cy="46" r="13" fill="none" stroke="#c9a227" stroke-width="2" stroke-dasharray="2 4"/><circle cx="40" cy="46" r="6" fill="#c9a227"/><rect x="30" y="74" width="20" height="6" rx="2" fill="#c9c2b4"/></svg>' },
-    { id: 'l12', name: '天排灯', en: 'Cyc Light', answer: 'fx12', hint: '一排朝上照向天幕',
+    { id: 'l12', name: '天排灯', en: 'Cyc Light', answer: 'fx12', hint: '一排朝上照向天幕', colors: ['#ff6b6b', '#ffd166', '#4ecdc4'],
       img: '<svg viewBox="0 0 96 96"><rect x="16" y="62" width="52" height="12" rx="5" fill="#e8e4d8"/><rect x="16" y="74" width="52" height="5" rx="2" fill="#c9c2b4"/><path d="M32 62 Q32 28 22 16" stroke="#ff6b6b" stroke-width="8" opacity="0.5" stroke-linecap="round"/><path d="M50 62 Q50 28 40 16" stroke="#ffd166" stroke-width="8" opacity="0.5" stroke-linecap="round"/><path d="M68 62 Q68 28 58 16" stroke="#4ecdc4" stroke-width="8" opacity="0.5" stroke-linecap="round"/></svg>' },
   ];  const EFFECTS = [
     { id: 'fx1', icon: '🎯', title: '角色跟随', desc: '光束追着主角移动，走到哪亮到哪' },
@@ -721,7 +722,8 @@
       sfxCorrect();
       const slot = document.querySelector('.char-slot[data-id="' + fxId + '"]');
       if (slot) { slot.classList.remove('pop'); void slot.offsetWidth; slot.classList.add('pop'); }
-      if (slot) burstAt(slot);
+      const light = LIGHTS.find(function(s) { return s.id === lightId; });
+      if (slot) burstAt(slot, light && light.colors, light ? '✓ ' + light.name : '+1');
       const ms = DIFFS[difficulty].milestones;
       if (streak === ms[0]) {
         sfxMilestone();
@@ -778,20 +780,20 @@
     }
   }
 
-  function burstAt(el) {
+  function burstAt(el, colors, label) {
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    const colors = ['var(--gold)', 'var(--cyan)', 'var(--purple)', 'var(--correct)', 'var(--accent)'];
-    for (let i = 0; i < 10; i++) {
+    const cols = colors && colors.length ? colors : ['var(--gold)', 'var(--cyan)', 'var(--purple)', 'var(--correct)', 'var(--accent)'];
+    for (let i = 0; i < 12; i++) {
       const p = document.createElement('div');
       p.className = 'burst-particle';
       const ang = Math.random() * Math.PI * 2;
       const dist = 28 + Math.random() * 48;
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
-      p.style.background = colors[i % colors.length];
+      p.style.background = cols[i % cols.length];
       p.style.setProperty('--dx', (Math.cos(ang) * dist) + 'px');
       p.style.setProperty('--dy', (Math.sin(ang) * dist) + 'px');
       document.body.appendChild(p);
@@ -799,7 +801,7 @@
     }
     const txt = document.createElement('div');
     txt.className = 'float-text';
-    txt.textContent = '+1';
+    txt.textContent = label || '+1';
     txt.style.left = cx + 'px';
     txt.style.top = (cy - 10) + 'px';
     document.body.appendChild(txt);
