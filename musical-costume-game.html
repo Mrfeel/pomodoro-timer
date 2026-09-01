@@ -16,6 +16,19 @@
     --correct: #27ae60;
     --wrong: #e74c3c;
     --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --text: #3d3226;
+    --muted: #7a6e5d;
+    --btn-bg: #ffffff;
+    --progress-track: #f0e6d2;
+    --char-border: #b8c8e8;
+    --char-name: #2c3e50;
+    --source-bg: #e8eef7;
+    --source-text: #8a9bb5;
+    --placed: #6a5a48;
+    --drag-over-bg: #d4e4ff;
+    --correct-bg: #d5f5e3;
+    --wrong-bg: #fadbd8;
+    --footer: #a09080;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,11 +36,13 @@
   body {
     font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
     background: var(--bg);
-    color: #3d3226;
+    color: var(--text);
     min-height: 100vh;
     padding: 24px;
     line-height: 1.6;
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
     touch-action: manipulation;
   }
 
@@ -44,15 +59,22 @@
   }
 
   header p {
-    color: #7a6e5d;
+    color: var(--muted);
     font-size: 0.95rem;
+  }
+
+  #bestInfo {
+    display: block;
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-top: 6px;
   }
 
   .toolbar {
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
   }
 
@@ -71,20 +93,49 @@
     background: var(--accent);
     color: #fff;
   }
-  .btn-check:hover { background: #a93226; transform: translateY(-1px); }
+  .btn-check:hover { filter: brightness(0.9); transform: translateY(-1px); }
 
   .btn-reset {
-    background: #fff;
+    background: var(--btn-bg);
     color: var(--accent);
     border: 2px solid var(--accent);
   }
-  .btn-reset:hover { background: #fdf2f0; }
+  .btn-reset:hover { filter: brightness(0.96); }
+
+  .btn-undo {
+    background: var(--btn-bg);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+  }
+  .btn-undo:hover { filter: brightness(0.96); }
 
   .btn-shuffle {
     background: var(--gold);
     color: #fff;
   }
-  .btn-shuffle:hover { background: #b8860b; }
+  .btn-shuffle:hover { filter: brightness(0.9); }
+
+  .progress-wrap { max-width: 1200px; margin: 0 auto 18px; }
+  .progress-bar {
+    background: var(--progress-track);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+  .progress-text {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
 
   .container {
     display: grid;
@@ -102,9 +153,12 @@
     .sticker { padding: 12px 14px; }
     .sticker .costume { font-size: 0.88rem; }
     .char-slot { padding: 12px 14px; }
+    .char-slot { min-height: 64px; }
     .char-slot .name { font-size: 0.92rem; }
     header h1 { font-size: 1.5rem; }
     header p { font-size: 0.82rem; }
+    .toolbar button { padding: 10px 14px; }
+    .diff-group button { padding: 10px 12px; }
   }
 
   .panel {
@@ -144,6 +198,10 @@
     position: relative;
     box-shadow: 2px 3px 0 rgba(0,0,0,0.06);
     user-select: none;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .sticker:hover {
     transform: rotate(-1.5deg) scale(1.02);
@@ -153,14 +211,16 @@
   .sticker:active { cursor: grabbing; }
   .sticker .costume {
     font-size: 0.92rem;
-    color: #4a3f30;
+    color: var(--text);
   }
   .sticker .hint {
     font-size: 0.75rem;
-    color: #9a8c7a;
+    color: var(--muted);
     margin-top: 6px;
     font-style: italic;
   }
+
+  .sticker-text { flex: 1; min-width: 0; }
 
   /* 人物槽 */
   .char-list {
@@ -171,7 +231,7 @@
 
   .char-slot {
     background: var(--char);
-    border: 2px dashed #b8c8e8;
+    border: 2px dashed var(--char-border);
     border-radius: 12px;
     padding: 14px 18px;
     display: flex;
@@ -193,14 +253,14 @@
   .char-slot .name {
     font-weight: 600;
     font-size: 1rem;
-    color: #2c3e50;
+    color: var(--char-name);
     flex: 1;
   }
 
   .char-slot .source {
     font-size: 0.72rem;
-    color: #8a9bb5;
-    background: #e8eef7;
+    color: var(--source-text);
+    background: var(--source-bg);
     padding: 2px 8px;
     border-radius: 8px;
     flex-shrink: 0;
@@ -208,7 +268,7 @@
 
   .char-slot .placed {
     font-size: 0.82rem;
-    color: #6a5a48;
+    color: var(--placed);
     font-style: italic;
     flex: 1;
   }
@@ -220,14 +280,14 @@
   }
 
   .char-slot.drag-over {
-    background: #d4e4ff;
+    background: var(--drag-over-bg);
     border-color: var(--gold);
     border-style: solid;
     transform: scale(1.01);
   }
 
   .char-slot.correct {
-    background: #d5f5e3;
+    background: var(--correct-bg);
     border-color: var(--correct);
     border-style: solid;
   }
@@ -235,7 +295,7 @@
   .char-slot.correct .name { color: var(--correct); }
 
   .char-slot.wrong {
-    background: #fadbd8;
+    background: var(--wrong-bg);
     border-color: var(--wrong);
     border-style: solid;
   }
@@ -245,8 +305,9 @@
   .sticker.matched {
     opacity: 0.5;
     border-style: dashed;
-    border-color: #ccc;
+    border-color: var(--border);
     cursor: default;
+    pointer-events: none;
   }
 
   .sticker.selected {
@@ -271,7 +332,7 @@
   footer {
     text-align: center;
     margin-top: 32px;
-    color: #a09080;
+    color: var(--footer);
     font-size: 0.8rem;
   }
 
@@ -281,32 +342,163 @@
     gap: 20px;
     margin-bottom: 16px;
     font-size: 0.82rem;
-    color: #7a6e5d;
+    color: var(--muted);
+    flex-wrap: wrap;
   }
   .legend span { display: flex; align-items: center; gap: 6px; }
   .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
   .dot.green { background: var(--correct); }
   .dot.red { background: var(--wrong); }
   .dot.gold { background: var(--gold); }
-</style>
-</head>
+
+  /* ===== 反馈动画 ===== */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .char-slot.shake {
+    animation: shake 0.45s ease;
+    border-color: var(--wrong) !important;
+    border-style: solid;
+  }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .char-slot.pop {
+    animation: pop 0.35s ease;
+    border-color: var(--correct) !important;
+    border-style: solid;
+  }
+
+  /* ===== 拖拽幽灵 ===== */
+  .drag-ghost {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    width: 300px;
+    max-width: 62vw;
+    background: var(--sticker);
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 6px 8px 18px rgba(0,0,0,0.28);
+    opacity: 0.92;
+    transform: rotate(-2deg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .drag-ghost .sticker-text { flex: 1; min-width: 0; }
+  .drag-ghost .costume {
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+  .drag-ghost .hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* ===== 通关彩带 ===== */
+  .confetti {
+    position: fixed;
+    z-index: 9998;
+    pointer-events: none;
+    width: 10px;
+    height: 16px;
+    border-radius: 2px;
+    animation: confetti-fall 1.8s ease-out forwards;
+  }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--dx), 88vh) rotate(var(--dr)); }
+  }
+
+  /* ===== 音效 / 主题 / 难度按钮 ===== */
+  .btn-tool {
+    background: var(--btn-bg);
+    color: var(--muted);
+    border: 2px solid var(--border);
+  }
+  .btn-tool:hover { filter: brightness(0.96); }
+
+  .diff-group {
+    display: inline-flex;
+    background: var(--btn-bg);
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .diff-group button {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  .diff-group button.active {
+    background: var(--gold);
+    color: #fff;
+  }
+
+  /* ===== 主题（body[data-theme] 一键切换） ===== */
+  body[data-theme="stage"] {
+    --bg: #12141c; --paper: #1d2130; --sticker: #262c3f; --char: #262c3f;
+    --border: #3a4160; --accent: #ff6b6b; --gold: #ffd166;
+    --text: #f0ead6; --muted: #9aa0b8;
+    --btn-bg: #262c3f; --progress-track: #262c3f;
+    --char-border: #3a4160; --char-name: #f0ead6;
+    --source-bg: #323a56; --source-text: #9aa0b8; --placed: #4ecdc4;
+    --drag-over-bg: #2c3350; --correct-bg: rgba(46, 204, 113, 0.16); --wrong-bg: rgba(231, 76, 60, 0.16);
+    --footer: #5a6080;
+  }
+  body[data-theme="fresh"] {
+    --bg: #eef4fb; --paper: #ffffff; --sticker: #f8fbff; --char: #f0f6ff;
+    --border: #c9d8ec; --accent: #2980b9; --gold: #e67e22;
+    --text: #2c3e50; --muted: #7f8fa6;
+    --btn-bg: #ffffff; --progress-track: #e8eef7;
+    --char-border: #c9d8ec; --char-name: #2c3e50;
+    --source-bg: #e8eef7; --source-text: #7f8fa6; --placed: #2980b9;
+    --drag-over-bg: #d4e4ff; --correct-bg: #d5f5e3; --wrong-bg: #fdeaea;
+    --footer: #9aa7b8;
+  }
+</style></head>
 <body>
 
 <header>
   <h1>🎭 音乐剧服装贴纸书</h1>
-  <p>桌面端：把左边的「服装贴纸」拖到右边对应的人物槽里<br>手机端：先点选贴纸，再点击人物槽完成连线</p>
+  <p>拖动或点选左侧「服装贴纸」，放到右边对应的人物槽里（手机直接按住拖动）</p>
+  <span id="bestInfo"></span>
 </header>
 
 <div class="legend">
-  <span><i class="dot gold"></i>点选/拖拽贴纸</span>
+  <span><i class="dot gold"></i>拖动/点选贴纸</span>
   <span><i class="dot green"></i>匹配正确</span>
-  <span><i class="dot red"></i>匹配错误</span>
+  <span><i class="dot red"></i>匹配错误（抖动还原）</span>
 </div>
 
 <div class="toolbar">
+  <div class="diff-group">
+    <button class="btn-diff" data-diff="easy" onclick="setDifficulty('easy')">🔰 简易 8</button>
+    <button class="btn-diff" data-diff="full" onclick="setDifficulty('full')">🔰 全量 16</button>
+  </div>
   <button class="btn-shuffle" onclick="shuffleStickers()">🔀 随机打乱</button>
+  <button class="btn-undo" onclick="undoLast()">↩ 撤销</button>
   <button class="btn-check" onclick="checkAll()">✅ 检查答案</button>
   <button class="btn-reset" onclick="resetAll()">↺ 重置</button>
+  <button class="btn-tool" id="btnSound" onclick="toggleSound()">🔊 音效</button>
+  <button class="btn-tool" id="btnTheme" onclick="cycleTheme()">🎨 歌剧院</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">已正确匹配 0 / 16</div>
 </div>
 
 <div class="container">
@@ -326,7 +518,7 @@
 <div class="result" id="result"></div>
 
 <footer>
-  素材来源：经典百老汇/西区音乐剧剧照 · 仅用于活动体验
+  素材来源：经典百老汇/西区音乐剧剧照 · 仅用于活动体验 · 桌面端可拖拽，手机端按住即拖
 </footer>
 
 <script>
@@ -335,7 +527,7 @@
   // 每个人物: { id, name, source }
   const STICKERS = [
     { id: 's1', costume: '黑色斗篷、白色半脸面具、白衬衫、黑领结，手执红玫瑰', hint: '半脸面具是最大特征', source: '歌剧魅影', answer: 'phantom' },
-    { id: 's2', costume: '白色芭蕾舞裙、蓝色丝带、金色长发、粉色丝带', hint: '芭蕾舞裙+丝带', source: '歌剧魅影', answer: 'christine' },
+    { id: 's2', costume: '白色芭蕾舞裙、蓝色丝带、粉色丝带', hint: '芭蕾舞裙+丝带', source: '歌剧魅影', answer: 'christine' },
     { id: 's3', costume: '棕色呢子大衣、高顶礼帽、外套上别着一枚红缎带', hint: '红缎带是标志', source: '悲惨世界', answer: 'valjean' },
     { id: 's4', costume: '白色内衬长裙、蓝色披肩、红色头发，后期衣衫凌乱', hint: '红发+蓝披肩', source: '悲惨世界', answer: 'fantine' },
     { id: 's5', costume: '蓝色优雅长裙、白色裙摆缀满花朵、珍珠项链', hint: '白裙+花朵', source: '悲惨世界', answer: 'cosette' },
@@ -348,7 +540,7 @@
     { id: 's12', costume: '蓝色POLO衫、牛仔夹克、手臂上戴着石膏护臂', hint: '石膏护臂是关键', source: '致埃文·汉森', answer: 'evan' },
     { id: 's13', costume: '金色狮子鬃毛头套、棕色/金色身体装', hint: '狮子鬃毛', source: '狮子王', answer: 'simba' },
     { id: 's14', costume: '紫色马甲、蓝色灯笼裤、红色头巾、棕色靴子', hint: '紫马甲+红头巾', source: '阿拉丁', answer: 'aladdin' },
-    { id: 's15', costume: '红色鸭舌帽、破旧呢子大衣、肩挎吉他', hint: '红帽+吉他', source: '冥界', answer: 'orpheus' },
+    { id: 's15', costume: '破旧呢子大衣、肩挎吉他', hint: '大衣+吉他', source: '冥界', answer: 'orpheus' },
     { id: 's16', costume: '绿色连衣裙、金色腰带、深色卷发', hint: '绿裙+金腰带', source: '冥界', answer: 'euridice' },
   ];
 
@@ -369,12 +561,109 @@
     { id: 'aladdin', name: '阿拉丁 Aladdin', source: '《阿拉丁》' },
     { id: 'orpheus', name: '奥菲斯 Orpheus', source: '《冥界》' },
     { id: 'euridice', name: '欧律狄刻 Eurydice', source: '《冥界》' },
-  ];
-
+  ];  // ===== Q版小人图（手绘 SVG，随卡片一起展示） =====
   // ===== 状态 =====
-  let stickerOrder = [...STICKERS];
+  // ---- 主题 / 音效 / 难度（选择会被记住） ----
+  const THEMES = ['opera', 'stage', 'fresh'];
+  const THEME_LABELS = { opera: '歌剧院', stage: '舞台', fresh: '清新' };
+  const EASY_IDS = ['s1', 's3', 's6', 's7', 's8', 's10', 's13', 's14'];
+  const DIFFS = {
+    easy: { label: '简易', size: 8, milestones: [3, 5] },
+    full: { label: '全量', size: 16, milestones: [5, 10] }
+  };
+
+  function loadPref(key, def) {
+    try { const v = localStorage.getItem(key); return v === null ? def : v; } catch (err) { return def; }
+  }
+  let difficulty = loadPref('costumeDiff', 'easy');
+  let theme = loadPref('costumeTheme', 'opera');
+  let soundOn = loadPref('costumeSound', '1') === '1';
+  let audioCtx = null;
+
+  function activeStickers() { return STICKERS.filter(function(s) { return difficulty === 'easy' ? EASY_IDS.indexOf(s.id) >= 0 : true; }); }
+  function activeChars() {
+    const ids = new Set(activeStickers().map(function(s) { return s.answer; }));
+    return CHARACTERS.filter(function(c) { return ids.has(c.id); });
+  }
+  function totalCount() { return activeStickers().length; }
+  function bestKey() { return 'costumeGameBest_' + difficulty; }
+
+  // ---- 音效（Web Audio，无需素材） ----
+  function ensureAudio() {
+    if (!soundOn) return;
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (err) {} }
+    if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (err) {} }
+  }
+  function tone(freq, start, dur, type, vol) {
+    if (!audioCtx || !soundOn) return;
+    try {
+      const t0 = audioCtx.currentTime + start;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol || 0.16, t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.05);
+    } catch (err) {}
+  }
+  function sfxCorrect() { ensureAudio(); tone(523.25, 0, 0.14, 'sine', 0.18); tone(659.25, 0.09, 0.16, 'sine', 0.18); }
+  function sfxWrong() { ensureAudio(); tone(196, 0, 0.22, 'sawtooth', 0.12); tone(147, 0.08, 0.26, 'sawtooth', 0.12); }
+  function sfxMilestone() { ensureAudio(); [523.25, 659.25, 783.99, 1046.5].forEach(function(f, i) { tone(f, i * 0.09, 0.18, 'triangle', 0.2); }); }
+  function sfxWin() { ensureAudio(); [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach(function(f, i) { tone(f, i * 0.12, 0.22, 'triangle', 0.2); }); }
+
+  // ---- 主题 ----
+  function applyTheme() {
+    document.body.setAttribute('data-theme', theme);
+    const btn = document.getElementById('btnTheme');
+    if (btn) btn.textContent = '🎨 ' + THEME_LABELS[theme];
+    try { localStorage.setItem('costumeTheme', theme); } catch (err) {}
+  }
+  function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length]; applyTheme(); }
+
+  // ---- 音效开关 ----
+  function updateSoundBtn() {
+    const btn = document.getElementById('btnSound');
+    if (btn) btn.textContent = soundOn ? '🔊 音效' : '🔇 静音';
+    try { localStorage.setItem('costumeSound', soundOn ? '1' : '0'); } catch (err) {}
+  }
+  function toggleSound() { soundOn = !soundOn; updateSoundBtn(); }
+
+  // ---- 难度 ----
+  function setDifficulty(d) {
+    if (difficulty === d) return;
+    difficulty = d;
+    try { localStorage.setItem('costumeDiff', d); } catch (err) {}
+    document.querySelectorAll('.btn-diff').forEach(function(b) { b.classList.toggle('active', b.dataset.diff === d); });
+    freshRound();
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+  let stickerOrder = shuffleArray(activeStickers());
   let assignments = {}; // stickerId -> characterId
   let matchedStickers = new Set();
+  let streak = 0;
+  let mistakes = 0;
+  let history = [];
+  let completedShown = false;
+  let selectedStickerId = null;
+  let draggedId = null;
+  let ghost = null;
+  let dragActive = false;
+  let dragSlotId = null;
+  let suppressClick = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startedDrag = false;
 
   // ===== 渲染 =====
   function renderStickers() {
@@ -383,12 +672,14 @@
     stickerOrder.forEach(s => {
       const el = document.createElement('div');
       el.className = 'sticker' + (matchedStickers.has(s.id) ? ' matched' : '');
-      el.draggable = !matchedStickers.has(s.id);
       el.dataset.id = s.id;
       el.innerHTML =
-        '<div class="costume">' + s.costume + '</div>' +
-        '<div class="hint">💡 ' + s.hint + '</div>';
-      el.addEventListener('dragstart', onDragStart);
+        '<div class="sticker-text"><div class="costume">' + s.costume + '</div>' +
+        '<div class="hint">💡 ' + s.hint + '</div></div>';
+      el.addEventListener('pointerdown', onPointerDown);
+      el.addEventListener('pointermove', onPointerMove);
+      el.addEventListener('pointerup', onPointerUp);
+      el.addEventListener('pointercancel', onPointerCancel);
       el.addEventListener('click', onStickerTap);
       sheet.appendChild(el);
     });
@@ -397,7 +688,7 @@
   function renderChars() {
     const list = document.getElementById('charList');
     list.innerHTML = '';
-    CHARACTERS.forEach(c => {
+    activeChars().forEach(c => {
       const el = document.createElement('div');
       el.className = 'char-slot';
       el.dataset.id = c.id;
@@ -406,9 +697,6 @@
         '<span class="name">' + c.name + '</span>' +
         '<span class="source">' + c.source + '</span>' +
         '<span class="placed"></span>';
-      el.addEventListener('dragover', onDragOver);
-      el.addEventListener('dragleave', onDragLeave);
-      el.addEventListener('drop', onDrop);
       el.addEventListener('click', onCharTap);
       list.appendChild(el);
     });
@@ -416,8 +704,9 @@
   }
 
   function updateCharPlaced() {
-    CHARACTERS.forEach(c => {
+    activeChars().forEach(c => {
       const slot = document.querySelector('.char-slot[data-id="' + c.id + '"]');
+      if (!slot) return;
       const placed = slot.querySelector('.placed');
       const assigned = Object.keys(assignments).filter(k => assignments[k] === c.id);
       if (assigned.length > 0) {
@@ -429,49 +718,151 @@
     });
   }
 
-  // ===== 拖拽（桌面端）+ 点选（移动端） =====
-  let draggedId = null;
-  let selectedStickerId = null; // 移动端点选状态
-
-  function onDragStart(e) {
-    draggedId = e.currentTarget.dataset.id;
-    e.currentTarget.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', draggedId);
+  function updateProgress() {
+    const total = totalCount();
+    const matched = matchedStickers.size;
+    const fill = document.getElementById('progressFill');
+    const txt = document.getElementById('progressText');
+    if (fill) fill.style.width = (matched / total * 100) + '%';
+    if (txt) {
+      let s = '已正确匹配 ' + matched + ' / ' + total;
+      if (streak >= 2) s += ' · 🔥 连对 ' + streak;
+      if (mistakes > 0) s += ' · 错误 ' + mistakes + ' 次';
+      txt.textContent = s;
+    }
+    updateBest();
   }
 
-  function onDragOver(e) {
-    e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
+  function updateBest() {
+    const b = loadBest();
+    const el = document.getElementById('bestInfo');
+    if (el) el.textContent = b > 0 ? '🏅 个人最佳：' + b + ' / ' + totalCount() : '';
   }
 
-  function onDragLeave(e) {
-    e.currentTarget.classList.remove('drag-over');
+  function loadBest() {
+    try { return parseInt(localStorage.getItem(bestKey()) || '0', 10) || 0; } catch (err) { return 0; }
   }
 
-  function onDrop(e) {
-    e.preventDefault();
-    const charId = e.currentTarget.dataset.id;
-    e.currentTarget.classList.remove('drag-over');
-
-    if (draggedId === null) return;
-
-    placeSticker(draggedId, charId);
-    draggedId = null;
+  function saveBest() {
+    const m = matchedStickers.size;
+    if (m > loadBest()) {
+      try { localStorage.setItem(bestKey(), String(m)); } catch (err) {}
+    }
   }
 
-  // 移动端：点击贴纸 = 选中
-  function onStickerTap(e) {
+  function setResult(msg, cls) {
+    const r = document.getElementById('result');
+    r.textContent = msg;
+    r.className = 'result' + (cls ? ' ' + cls : '');
+  }  // ===== 统一拖拽（鼠标 + 触屏） =====
+  function onPointerDown(e) {
     const id = e.currentTarget.dataset.id;
     if (matchedStickers.has(id)) return;
-
-    // 取消之前选中的
-    document.querySelectorAll('.sticker.selected').forEach(el => el.classList.remove('selected'));
-    selectedStickerId = id;
-    e.currentTarget.classList.add('selected');
+    selectSticker(id);
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    startedDrag = false;
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
   }
 
-  // 移动端：点击人物槽 = 放置选中的贴纸
+  function onPointerMove(e) {
+    if (pointerId !== e.pointerId) return;
+    if (!startedDrag) {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) + Math.abs(dy) < 8) return;
+      beginDrag(e.currentTarget, e.clientX, e.clientY);
+    }
+    if (!dragActive) return;
+    e.preventDefault();
+    moveGhost(e.clientX, e.clientY);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = under ? under.closest('.char-slot') : null;
+    highlightSlot(slot ? slot.dataset.id : null);
+  }
+
+  function onPointerUp(e) {
+    if (pointerId !== e.pointerId) return;
+    pointerId = null;
+    const wasDrag = startedDrag;
+    startedDrag = false;
+    if (wasDrag && dragActive) {
+      e.preventDefault();
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      const slot = under ? under.closest('.char-slot') : null;
+      if (slot && draggedId) {
+        suppressClick = true;
+        setTimeout(function() { suppressClick = false; }, 0);
+        selectedStickerId = null;
+        placeSticker(draggedId, slot.dataset.id);
+      }
+    }
+    endDrag();
+  }
+
+  function onPointerCancel(e) {
+    if (pointerId !== e.pointerId) return;
+    pointerId = null;
+    startedDrag = false;
+    endDrag();
+  }
+
+  function beginDrag(sticker, x, y) {
+    startedDrag = true;
+    dragActive = true;
+    draggedId = sticker.dataset.id;
+    ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    ghost.innerHTML = sticker.innerHTML;
+    document.body.appendChild(ghost);
+    sticker.classList.add('dragging');
+    moveGhost(x, y);
+  }
+
+  function moveGhost(x, y) {
+    if (!ghost) return;
+    ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
+    ghost.style.top = (y - ghost.offsetHeight / 2) + 'px';
+  }
+
+  function highlightSlot(id) {
+    if (dragSlotId === id) return;
+    document.querySelectorAll('.char-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+    dragSlotId = id;
+    if (id) {
+      const slot = document.querySelector('.char-slot[data-id="' + id + '"]');
+      if (slot) slot.classList.add('drag-over');
+    }
+  }
+
+  function endDrag() {
+    dragActive = false;
+    draggedId = null;
+    dragSlotId = null;
+    pointerId = null;
+    startedDrag = false;
+    if (ghost) { ghost.remove(); ghost = null; }
+    document.querySelectorAll('.sticker.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.char-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+  }
+
+  function selectSticker(id) {
+    selectedStickerId = id;
+    document.querySelectorAll('.sticker.selected').forEach(el => el.classList.remove('selected'));
+    const el = document.querySelector('.sticker[data-id="' + id + '"]');
+    if (el) el.classList.add('selected');
+  }
+
+  // ===== 点选（备选操作方式） =====
+  function onStickerTap(e) {
+    if (suppressClick) return;
+    const id = e.currentTarget.dataset.id;
+    if (matchedStickers.has(id)) return;
+    selectSticker(id);
+  }
+
   function onCharTap(e) {
     if (selectedStickerId === null) return;
     const charId = e.currentTarget.dataset.id;
@@ -480,140 +871,168 @@
     document.querySelectorAll('.sticker.selected').forEach(el => el.classList.remove('selected'));
   }
 
-  // 核心：把贴纸放入槽位
-  function placeSticker(stickerId, charId) {
-    const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
-    if (!slot) return;
-
-    // 若目标槽已有别的贴纸，先释放它
-    const prevStickerInSlot = Object.keys(assignments).find(k => assignments[k] === charId);
-    if (prevStickerInSlot && prevStickerInSlot !== stickerId) {
-      const prevEl = document.querySelector('.sticker[data-id="' + prevStickerInSlot + '"]');
-      if (prevEl) {
-        prevEl.classList.remove('matched');
-        prevEl.draggable = true;
-      }
-      delete assignments[prevStickerInSlot];
-      matchedStickers.delete(prevStickerInSlot);
+  // ===== 匹配判定与反馈 =====
+  function releaseSticker(stickerId) {
+    const charId = assignments[stickerId];
+    delete assignments[stickerId];
+    matchedStickers.delete(stickerId);
+    if (charId) {
+      const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
+      if (slot) slot.classList.remove('correct', 'wrong', 'shake', 'pop');
     }
-
-    // 移除该贴纸之前的分配
-    const prevChar = assignments[stickerId];
-    if (prevChar) {
-      const prevSlot = document.querySelector('.char-slot[data-id="' + prevChar + '"]');
-      if (prevSlot) prevSlot.classList.remove('correct', 'wrong');
-    }
-
-    assignments[stickerId] = charId;
-    matchedStickers.add(stickerId);
-
-    // 高亮该槽
-    const sticker = STICKERS.find(s => s.id === stickerId);
-    const isCorrect = sticker.answer === charId;
-    slot.classList.add(isCorrect ? 'correct' : 'wrong');
-
-    // 贴纸变灰
     const stickerEl = document.querySelector('.sticker[data-id="' + stickerId + '"]');
-    if (stickerEl) {
-      stickerEl.classList.add('matched');
-      stickerEl.draggable = false;
-    }
-
+    if (stickerEl) stickerEl.classList.remove('matched', 'selected');
     updateCharPlaced();
+    updateProgress();
   }
 
-  // ===== 提醒节点 =====
-  let milestonesShown = new Set();
+  function setAssignment(stickerId, charId) {
+    const displaced = Object.keys(assignments).find(k => assignments[k] === charId);
+    if (displaced && displaced !== stickerId) releaseSticker(displaced);
+    const oldChar = assignments[stickerId];
+    if (oldChar && oldChar !== charId) {
+      const oldSlot = document.querySelector('.char-slot[data-id="' + oldChar + '"]');
+      if (oldSlot) oldSlot.classList.remove('correct', 'wrong', 'shake', 'pop');
+    }
+    assignments[stickerId] = charId;
+    const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
+    const sticker = STICKERS.find(s => s.id === stickerId);
+    const ok = !!(sticker && sticker.answer === charId);
+    if (slot) {
+      slot.classList.remove('correct', 'wrong', 'shake', 'pop');
+      slot.classList.add(ok ? 'correct' : 'wrong');
+    }
+    const stickerEl = document.querySelector('.sticker[data-id="' + stickerId + '"]');
+    if (stickerEl) stickerEl.classList.remove('selected');
+    if (ok) {
+      matchedStickers.add(stickerId);
+      if (stickerEl) stickerEl.classList.add('matched');
+    }
+    updateCharPlaced();
+    updateProgress();
+    return ok;
+  }
 
-  function checkMilestones(correct) {
-    const msgs = {
-      5: '🌟 达成 5 连胜！手感越来越好了！',
-      10: '🏆 十连对！你是音乐剧服装达人吗？',
-      16: '👑 满分通关！全部 16 个角色都认出来了！'
-    };
-    // 按正确数从高到低检查，避免跳级漏报
-    [16, 10, 5].forEach(n => {
-      if (correct >= n && !milestonesShown.has(n)) {
-        milestonesShown.add(n);
-        const result = document.getElementById('result');
-        result.textContent = msgs[n];
-        result.className = 'result success';
-      }
+  function placeSticker(stickerId, charId) {
+    const sticker = STICKERS.find(s => s.id === stickerId);
+    if (!sticker) return;
+    history.push({
+      stickerId: stickerId,
+      fromCharId: assignments[stickerId] || null,
+      toCharId: charId,
+      displacedId: Object.keys(assignments).find(k => assignments[k] === charId && k !== stickerId) || null,
+      streak: streak,
+      mistakes: mistakes
     });
+    const ok = setAssignment(stickerId, charId);
+    if (ok) {
+      streak++;
+      sfxCorrect();
+      const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
+      if (slot) { slot.classList.remove('pop'); void slot.offsetWidth; slot.classList.add('pop'); }
+      const ms = DIFFS[difficulty].milestones;
+      if (streak === ms[0]) {
+        sfxMilestone();
+        setResult('🌟 达成 ' + ms[0] + ' 连胜！手感越来越好了！', 'success');
+      } else if (ms.length > 1 && streak === ms[1]) {
+        sfxMilestone();
+        setResult('🏆 ' + ms[1] + ' 连对！你是音乐剧服装达人吗？', 'success');
+      } else if (matchedStickers.size === totalCount() && !completedShown) {
+        completedShown = true;
+        sfxWin();
+        setResult('👑 满分通关！全部 ' + totalCount() + ' 个角色都认出来了！', 'success');
+        celebrate();
+      }
+    } else {
+      mistakes++;
+      streak = 0;
+      sfxWrong();
+      const slot = document.querySelector('.char-slot[data-id="' + charId + '"]');
+      if (slot) { slot.classList.remove('shake'); void slot.offsetWidth; slot.classList.add('shake'); }
+      setResult('✗ 配对错了，再试试！', 'error');
+      setTimeout(function() {
+        if (assignments[stickerId] === charId) releaseSticker(stickerId);
+      }, 650);
+    }
+    updateProgress();
+    saveBest();
+  }
+
+  function undoLast() {
+    const last = history.pop();
+    if (!last) { setResult('没有可撤销的操作', 'error'); return; }
+    releaseSticker(last.stickerId);
+    if (last.displacedId) setAssignment(last.displacedId, last.toCharId);
+    if (last.fromCharId) setAssignment(last.stickerId, last.fromCharId);
+    streak = last.streak;
+    mistakes = last.mistakes;
+    setResult('↩ 已撤销上一步', 'error');
+    updateProgress();
+  }
+
+  function celebrate() {
+    const colors = ['#d4a017', '#c0392b', '#27ae60', '#e67e22', '#8e44ad', '#2980b9'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = (Math.random() * 100) + 'vw';
+      c.style.top = '-18px';
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty('--dx', ((Math.random() - 0.5) * 180) + 'px');
+      c.style.setProperty('--dr', ((Math.random() - 0.5) * 560) + 'deg');
+      c.style.animationDelay = (Math.random() * 0.7) + 's';
+      document.body.appendChild(c);
+      setTimeout(function(el) { el.remove(); }, 2600 + i, c);
+    }
   }
 
   // ===== 操作 =====
-  function shuffleStickers() {
-    // 重置
+  function freshRound() {
     assignments = {};
     matchedStickers = new Set();
-    milestonesShown = new Set();
-    document.querySelectorAll('.char-slot').forEach(s => s.classList.remove('correct', 'wrong', 'drag-over'));
-    // Fisher-Yates 打乱
-    const arr = [...STICKERS];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    stickerOrder = arr;
-    document.getElementById('result').textContent = '';
-    document.getElementById('result').className = 'result';
+    streak = 0;
+    mistakes = 0;
+    history = [];
+    completedShown = false;
+    selectedStickerId = null;
+    endDrag();
+    stickerOrder = shuffleArray(activeStickers());
+    document.querySelectorAll('.char-slot').forEach(s => s.classList.remove('correct', 'wrong', 'shake', 'pop', 'drag-over'));
+    setResult('', '');
     renderStickers();
     renderChars();
+    updateProgress();
+    updateBest();
   }
+
+  function shuffleStickers() { freshRound(); }
+
+  function resetAll() { freshRound(); }
 
   function checkAll() {
-    const total = CHARACTERS.length;
-    let correct = 0;
-    CHARACTERS.forEach(c => {
-      const slot = document.querySelector('.char-slot[data-id="' + c.id + '"]');
-      const assigned = Object.keys(assignments).filter(k => assignments[k] === c.id);
-      if (assigned.length === 0) {
-        slot.classList.remove('correct', 'wrong');
-      } else {
-        const sticker = STICKERS.find(s => s.id === assigned[0]);
-        if (sticker.answer === c.id) {
-          slot.classList.add('correct');
-          slot.classList.remove('wrong');
-          correct++;
-        } else {
-          slot.classList.add('wrong');
-          slot.classList.remove('correct');
-        }
-      }
-    });
-
-    const result = document.getElementById('result');
+    const total = totalCount();
+    const correct = matchedStickers.size;
     if (correct === total) {
-      result.textContent = '🎉 全部正确！太棒了！';
-      result.className = 'result success';
+      setResult('🎉 全部正确！太棒了！', 'success');
+      if (!completedShown) {
+        completedShown = true;
+        celebrate();
+      }
     } else if (correct === 0) {
-      result.textContent = '还没开始匹配哦～';
-      result.className = 'result error';
+      setResult('还没开始匹配哦～', 'error');
     } else {
-      result.textContent = '⭐ 得分：' + correct + ' / ' + total + ' · 继续加油！';
-      result.className = 'result error';
+      setResult('⭐ 已正确匹配 ' + correct + ' / ' + total + ' · 继续加油！', 'error');
     }
-
-    // 提醒节点：5 / 10 / 16 连胜
-    checkMilestones(correct);
-  }
-
-  function resetAll() {
-    assignments = {};
-    matchedStickers = new Set();
-    milestonesShown = new Set();
-    document.querySelectorAll('.char-slot').forEach(s => s.classList.remove('correct', 'wrong', 'drag-over'));
-    stickerOrder = [...STICKERS];
-    document.getElementById('result').textContent = '';
-    document.getElementById('result').className = 'result';
-    renderStickers();
-    renderChars();
   }
 
   // ===== 初始化 =====
+  applyTheme();
+  updateSoundBtn();
+  document.querySelectorAll('.btn-diff').forEach(function(b) { b.classList.toggle('active', b.dataset.diff === difficulty); });
   renderStickers();
   renderChars();
+  updateProgress();
+  updateBest();
 </script>
 </body>
 </html>

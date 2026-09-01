@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>舞台灯光设计 · 灯具配对</title>
+<style>
+  :root {
+    --bg: #12141c;
+    --panel: #1d2130;
+    --card: #262c3f;
+    --border: #3a4160;
+    --text: #f0ead6;
+    --muted: #9aa0b8;
+    --gold: #ffd166;
+    --accent: #ff6b6b;
+    --cyan: #4ecdc4;
+    --purple: #a29bfe;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+    --shadow: 0 4px 16px rgba(0,0,0,0.45);
+    --glow: #1c2233;
+    --img-bg: #10131c;
+    --img-border: #2c3248;
+    --toolbar-hover: #323a56;
+    --drag-over-bg: #2c3350;
+    --correct-bg: rgba(46, 204, 113, 0.12);
+    --wrong-bg: rgba(231, 76, 60, 0.12);
+    --footer: #5a6080;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--glow) 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+    line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  header h1 {
+    font-size: 1.9rem;
+    background: linear-gradient(135deg, var(--gold), var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 2px;
+  }
+  header p { color: var(--muted); font-size: 0.92rem; margin-top: 6px; }
+  #bestInfo { display: block; color: var(--cyan); font-size: 0.9rem; margin-top: 6px; }
+  .legend {
+    display: flex; gap: 16px; justify-content: center;
+    flex-wrap: wrap; color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;
+  }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+  .dot.gold { background: var(--gold); }
+  .dot.green { background: var(--correct); }
+  .dot.red { background: var(--wrong); }
+  .toolbar {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .toolbar button {
+    background: var(--card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 9px 20px; font-size: 0.95rem; cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .toolbar button:hover { background: var(--toolbar-hover); }
+  .toolbar button:active { transform: scale(0.96); }
+  .toolbar .btn-tool {
+    background: var(--card); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 9px 20px; font-size: 0.95rem; cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .toolbar .btn-tool:hover { background: var(--toolbar-hover); }
+  .toolbar .btn-tool:active { transform: scale(0.96); }
+  .toolbar .diff-group {
+    display: inline-flex; background: var(--card);
+    border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+  }
+  .toolbar .diff-group button {
+    background: transparent; border: none; border-radius: 0;
+    padding: 9px 16px; font-size: 0.9rem;
+  }
+  .toolbar .diff-group button:hover { background: transparent; }
+  .toolbar .diff-group button.active { background: var(--gold); color: #1c2233; }
+  .progress-wrap { max-width: 1080px; margin: 0 auto 16px; }
+  .progress-bar {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 999px; height: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    border-radius: 999px; transition: width 0.35s ease;
+  }
+  .progress-text {
+    text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 6px;
+  }
+  .container {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+    max-width: 1080px; margin: 0 auto; align-items: start;
+  }
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px;
+  }
+  .panel h2 { font-size: 1.15rem; margin-bottom: 14px; color: var(--gold); }
+  .panel h2 .icon { margin-right: 6px; }
+  .sticker-sheet { display: flex; flex-direction: column; gap: 12px; }
+  .sticker {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 14px;
+    display: flex; gap: 14px; align-items: center;
+    cursor: grab; transition: border-color 0.2s, transform 0.1s, opacity 0.2s;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .sticker:hover { border-color: var(--gold); }
+  .sticker:active { cursor: grabbing; }
+  .sticker .lightimg {
+    width: 92px; height: 74px; flex-shrink: 0;
+    background: var(--img-bg); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--img-border); overflow: hidden;
+  }
+  .sticker .lightimg svg { width: 100%; height: 100%; display: block; }
+  .sticker .lname { font-weight: 700; font-size: 1.02rem; }
+  .sticker .lname .en { color: var(--muted); font-weight: 400; font-size: 0.78rem; margin-left: 6px; }
+  .sticker .hint { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+  .sticker.dragging { opacity: 0.55; }
+  .sticker.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,209,102,0.35); }
+  .sticker.matched { opacity: 0.4; pointer-events: none; border-color: var(--img-border); }
+  .char-list { display: flex; flex-direction: column; gap: 12px; }
+  .char-slot {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 14px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .char-slot:hover { border-color: var(--purple); }
+  .char-slot .row { display: flex; align-items: center; gap: 10px; }
+  .char-slot .icon { font-size: 1.5rem; }
+  .char-slot .title { font-weight: 700; font-size: 1rem; }
+  .char-slot .desc { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+  .char-slot .placed { display: block; color: var(--cyan); font-size: 0.82rem; margin-top: 6px; }
+  .char-slot.drag-over { border-color: var(--gold); background: var(--drag-over-bg); }
+  .char-slot.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .char-slot.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+  .result {
+    max-width: 1080px; margin: 18px auto 0; text-align: center;
+    font-size: 1.1rem; min-height: 28px;
+  }
+  .result.success { color: var(--gold); font-weight: 700; }
+  .result.error { color: var(--muted); }
+  footer { text-align: center; color: var(--footer); font-size: 0.8rem; margin-top: 26px; }
+
+  /* ===== 反馈动画 ===== */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .char-slot.shake { animation: shake 0.45s ease; border-color: var(--wrong) !important; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .char-slot.pop { animation: pop 0.35s ease; border-color: var(--correct) !important; }
+
+  /* ===== 拖拽幽灵 ===== */
+  .drag-ghost {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 212px; max-width: 46vw;
+    background: var(--card); border: 1px solid var(--gold);
+    border-radius: 14px; padding: 12px 14px;
+    display: flex; gap: 14px; align-items: center;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.65);
+    opacity: 0.92; transform: rotate(-2deg);
+  }
+  .drag-ghost .lightimg {
+    width: 92px; height: 74px; flex-shrink: 0;
+    background: var(--img-bg); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--img-border); overflow: hidden;
+  }
+  .drag-ghost .lightimg svg { width: 100%; height: 100%; display: block; }
+  .drag-ghost .lname { font-weight: 700; font-size: 1.02rem; }
+  .drag-ghost .lname .en { color: var(--muted); font-weight: 400; font-size: 0.78rem; margin-left: 6px; }
+  .drag-ghost .hint { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+  /* ===== 通关彩带 ===== */
+  .confetti {
+    position: fixed; z-index: 9998; pointer-events: none;
+    width: 10px; height: 16px; border-radius: 2px;
+    animation: confetti-fall 1.8s ease-out forwards;
+  }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--dx), 88vh) rotate(var(--dr)); }
+  }
+
+  @media (max-width: 760px) {
+    .container { grid-template-columns: 1fr; }
+    .sticker .lightimg { width: 78px; height: 62px; }
+  }
+
+  /* ===== 主题（body[data-theme] 一键切换） ===== */
+  body[data-theme="fresh"] {
+    --bg: #eef3fb; --panel: #ffffff; --card: #f8fbff; --border: #c9d8ec;
+    --text: #2c3e50; --muted: #7f8fa6; --gold: #e67e22; --accent: #e74c3c;
+    --cyan: #16a085; --purple: #8e7cc3; --correct: #27ae60; --wrong: #e74c3c;
+    --shadow: 0 4px 16px rgba(0,0,0,0.10);
+    --glow: #dce8f6; --img-bg: #eef3fb; --img-border: #c9d8ec;
+    --toolbar-hover: #e4edf8; --drag-over-bg: #d4e4ff;
+    --correct-bg: #d5f5e3; --wrong-bg: #fdeaea; --footer: #9aa7b8;
+  }
+  body[data-theme="neon"] {
+    --bg: #150f24; --panel: #201636; --card: #2a1e47; --border: #4a3a78;
+    --text: #f3eefc; --muted: #a99ac8; --gold: #ffd166; --accent: #ff6b9d;
+    --cyan: #4ecdc4; --purple: #b388ff; --correct: #2ecc71; --wrong: #ff5252;
+    --shadow: 0 4px 16px rgba(0,0,0,0.5);
+    --glow: #2a1e47; --img-bg: #180f2b; --img-border: #3a2c60;
+    --toolbar-hover: #3a2c60; --drag-over-bg: #3a2c60;
+    --correct-bg: rgba(46, 204, 113, 0.14); --wrong-bg: rgba(255, 82, 82, 0.14);
+    --footer: #7a6aa8;
+  }
+</style></head>
+<body>
+
+<header>
+  <h1>💡 舞台灯光设计 · 灯具配对</h1>
+  <p>拖动或点选左侧「灯具」，放到右边对应的「光效用途」槽里（手机直接按住拖动）</p>
+  <span id="bestInfo"></span>
+</header>
+
+<div class="legend">
+  <span><i class="dot gold"></i>拖动/点选灯具</span>
+  <span><i class="dot green"></i>匹配正确</span>
+  <span><i class="dot red"></i>匹配错误（抖动还原）</span>
+</div>
+
+<div class="toolbar">
+  <div class="diff-group">
+    <button class="btn-diff" data-diff="easy" onclick="setDifficulty('easy')">🔰 简易 6</button>
+    <button class="btn-diff" data-diff="full" onclick="setDifficulty('full')">🔰 全量 12</button>
+  </div>
+  <button class="btn-shuffle" onclick="shuffleLights()">🔀 随机打乱</button>
+  <button class="btn-undo" onclick="undoLast()">↩ 撤销</button>
+  <button class="btn-check" onclick="checkAll()">✅ 检查答案</button>
+  <button class="btn-reset" onclick="resetAll()">↺ 重置</button>
+  <button class="btn-tool" id="btnSound" onclick="toggleSound()">🔊 音效</button>
+  <button class="btn-tool" id="btnTheme" onclick="cycleTheme()">🎨 舞台</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">已正确匹配 0 / 12</div>
+</div>
+
+<div class="container">
+  <div class="panel">
+    <h2><span class="icon">🎛️</span>舞台灯具库</h2>
+    <div class="sticker-sheet" id="stickerSheet"></div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="icon">🌈</span>光效用途卡</h2>
+    <div class="char-list" id="charList"></div>
+  </div>
+</div>
+
+<div class="result" id="result"></div>
+
+<footer>
+  手绘 SVG 示意图 · 桌面端可拖拽，手机端按住即拖
+</footer>
+
+<script>
+  // ===== 数据 =====
+  // 每个灯具: { id, name, en, img(SVG), hint, answer }
+  // 每个用途: { id, icon, title, desc }
+  const LIGHTS = [
+    { id: 'l1', name: '追光灯', en: 'Followspot', answer: 'fx1', hint: '长筒造型，光束追人',
+      img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="10" y="38" width="26" height="20" rx="4" fill="#e8e4d8"/><rect x="10" y="44" width="26" height="4" fill="#c9c2b4"/><path d="M36 44 L74 28 L74 68 L36 52 Z" fill="#ffd166" opacity="0.6"/><circle cx="26" cy="48" r="7" fill="#ffd166"/></svg>' },
+    { id: 'l2', name: '聚光灯', en: 'Spot', answer: 'fx2', hint: '锥形光束，集中一点',
+      img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="12" y="40" width="22" height="16" rx="3" fill="#e8e4d8"/><path d="M34 47 L72 40 L72 56 L34 49 Z" fill="#fff3c4" opacity="0.85"/><circle cx="72" cy="48" r="5" fill="#fff3c4"/></svg>' },
+    { id: 'l3', name: '染色灯', en: 'Wash', answer: 'fx3', hint: '宽扁灯头，铺色均匀',
+      img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="8" y="38" width="32" height="20" rx="6" fill="#e8e4d8"/><path d="M40 46 Q62 28 84 36 Q84 60 40 52 Z" fill="#a29bfe" opacity="0.55"/><rect x="36" y="52" width="6" height="14" rx="2" fill="#c9c2b4"/></svg>' },
+    { id: 'l4', name: '成像灯', en: 'Profile', answer: 'fx4', hint: '可投影花纹图案',
+      img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="48" r="24" fill="#2a2f3a"/><rect x="10" y="40" width="26" height="16" rx="3" fill="#e8e4d8"/><path d="M36 46 L72 40 L72 56 L36 50 Z" fill="#ff8fab" opacity="0.5"/><path d="M60 44 l2.2 4.5 5-0.7 -3.6 3.5 1 4.9 -4.6-2.6 -4.6 2.6 1-4.9 -3.6-3.5 5 0.7z" fill="#ff8fab"/></svg>' },
+    { id: 'l5', name: '摇头灯', en: 'Moving Head', answer: 'fx5', hint: '灯头可自由旋转',
+      img: '<svg viewBox="0 0 96 96"><circle cx="30" cy="34" r="16" fill="#e8e4d8"/><circle cx="30" cy="34" r="7" fill="#4ecdc4"/><rect x="26" y="50" width="8" height="16" rx="2" fill="#c9c2b4"/><rect x="14" y="66" width="32" height="8" rx="3" fill="#2a2f3a"/><path d="M60 20 A22 22 0 0 1 60 48" stroke="#4ecdc4" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M60 20 l9 3 -3-8z" fill="#4ecdc4"/></svg>' },
+    { id: 'l6', name: 'PAR灯', en: 'PAR Can', answer: 'fx6', hint: '圆筒造型，光束强劲',
+      img: '<svg viewBox="0 0 96 96"><rect x="34" y="8" width="10" height="14" fill="#c9c2b4"/><circle cx="40" cy="50" r="28" fill="#2a2f3a"/><circle cx="40" cy="50" r="19" fill="#ffd166"/><circle cx="40" cy="50" r="19" fill="none" stroke="#e8e4d8" stroke-width="3"/><circle cx="40" cy="50" r="8" fill="#fff3c4"/></svg>' },
+    { id: 'l7', name: '频闪灯', en: 'Strobe', answer: 'fx7', hint: '闪电标记，高频闪光',
+      img: '<svg viewBox="0 0 96 96"><rect x="14" y="34" width="26" height="28" rx="5" fill="#e8e4d8"/><rect x="14" y="62" width="26" height="6" rx="2" fill="#c9c2b4"/><path d="M56 18 L36 46 L48 46 L40 74 L70 38 L56 38 Z" fill="#ffd166" stroke="#2a2f3a" stroke-width="2" stroke-linejoin="round"/></svg>' },
+    { id: 'l8', name: '柔光灯', en: 'Softlight', answer: 'fx8', hint: '柔光罩，光线柔和',
+      img: '<svg viewBox="0 0 96 96"><rect x="10" y="34" width="34" height="28" rx="10" fill="#e8e4d8"/><rect x="12" y="38" width="30" height="20" rx="8" fill="#fffdf7"/><line x1="20" y1="43" x2="34" y2="43" stroke="#d4c9b8"/><line x1="20" y1="48" x2="34" y2="48" stroke="#d4c9b8"/><line x1="20" y1="53" x2="34" y2="53" stroke="#d4c9b8"/><path d="M44 44 Q70 40 82 47 Q70 54 44 50 Z" fill="#fff3c4" opacity="0.4"/></svg>' },
+    { id: 'l9', name: '激光灯', en: 'Laser', answer: 'fx9', hint: '多束细光柱',
+      img: '<svg viewBox="0 0 96 96"><rect x="10" y="42" width="26" height="14" rx="4" fill="#e8e4d8"/><circle cx="18" cy="49" r="4" fill="#ff6b6b"/><path d="M36 45 L82 18" stroke="#ff6b6b" stroke-width="3" stroke-linecap="round"/><path d="M36 49 L86 46" stroke="#4ecdc4" stroke-width="3" stroke-linecap="round"/><path d="M36 53 L82 76" stroke="#a29bfe" stroke-width="3" stroke-linecap="round"/></svg>' },
+    { id: 'l10', name: 'LED灯带', en: 'LED Strip', answer: 'fx10', hint: '柔软可弯曲的灯条',
+      img: '<svg viewBox="0 0 96 96"><path d="M10 40 Q30 24 50 40 T90 40" stroke="#4ecdc4" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M10 58 Q30 42 50 58 T90 58" stroke="#ffd166" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="10" cy="40" r="5" fill="#4ecdc4"/><circle cx="90" cy="40" r="5" fill="#4ecdc4"/><circle cx="10" cy="58" r="5" fill="#ffd166"/><circle cx="90" cy="58" r="5" fill="#ffd166"/></svg>' },
+    { id: 'l11', name: '回光灯', en: 'Fresnel', answer: 'fx11', hint: '同心圆纹路的透镜',
+      img: '<svg viewBox="0 0 96 96"><circle cx="40" cy="46" r="28" fill="#2a2f3a"/><circle cx="40" cy="46" r="20" fill="#fff3c4"/><circle cx="40" cy="46" r="20" fill="none" stroke="#c9a227" stroke-width="2" stroke-dasharray="2 4"/><circle cx="40" cy="46" r="13" fill="none" stroke="#c9a227" stroke-width="2" stroke-dasharray="2 4"/><circle cx="40" cy="46" r="6" fill="#c9a227"/><rect x="30" y="74" width="20" height="6" rx="2" fill="#c9c2b4"/></svg>' },
+    { id: 'l12', name: '天排灯', en: 'Cyc Light', answer: 'fx12', hint: '一排朝上照向天幕',
+      img: '<svg viewBox="0 0 96 96"><rect x="16" y="62" width="52" height="12" rx="5" fill="#e8e4d8"/><rect x="16" y="74" width="52" height="5" rx="2" fill="#c9c2b4"/><path d="M32 62 Q32 28 22 16" stroke="#ff6b6b" stroke-width="8" opacity="0.5" stroke-linecap="round"/><path d="M50 62 Q50 28 40 16" stroke="#ffd166" stroke-width="8" opacity="0.5" stroke-linecap="round"/><path d="M68 62 Q68 28 58 16" stroke="#4ecdc4" stroke-width="8" opacity="0.5" stroke-linecap="round"/></svg>' },
+  ];  const EFFECTS = [
+    { id: 'fx1', icon: '🎯', title: '角色跟随', desc: '光束追着主角移动，走到哪亮到哪' },
+    { id: 'fx2', icon: '💠', title: '定点照亮', desc: '把舞台某个区域照得格外亮' },
+    { id: 'fx3', icon: '🎨', title: '氛围染色', desc: '整个舞台铺满色调，渲染情绪' },
+    { id: 'fx4', icon: '⭐', title: '图案投影', desc: '在地面或幕布上投出花纹图形' },
+    { id: 'fx5', icon: '🌀', title: '动态扫描', desc: '灯头自由旋转，光斑满场扫动' },
+    { id: 'fx6', icon: '🔥', title: '强劲光束', desc: '一束束强光穿透烟雾，点燃现场' },
+    { id: 'fx7', icon: '⚡', title: '节奏频闪', desc: '跟随鼓点快速闪动，制造动感' },
+    { id: 'fx8', icon: '☁️', title: '柔和底光', desc: '光线柔和均匀，几乎看不到影子' },
+    { id: 'fx9', icon: '🌠', title: '光束线条', desc: '细长光柱交错，科幻感十足' },
+    { id: 'fx10', icon: '📿', title: '轮廓勾边', desc: '沿布景和道具边缘发光描边' },
+    { id: 'fx11', icon: '👤', title: '舞台面光', desc: '照亮演员面部，最经典的主光' },
+    { id: 'fx12', icon: '🖼️', title: '天幕背景', desc: '把整块天幕均匀照亮，映出色调' },
+  ];
+
+  // ===== 状态 =====
+  // ---- 主题 / 音效 / 难度（选择会被记住） ----
+  const THEMES = ['stage', 'fresh', 'neon'];
+  const THEME_LABELS = { stage: '舞台', fresh: '清新', neon: '霓虹' };
+  const EASY_IDS = ['l1', 'l2', 'l3', 'l5', 'l6', 'l7'];
+  const DIFFS = {
+    easy: { label: '简易', size: 6, milestones: [3, 5] },
+    full: { label: '全量', size: 12, milestones: [5, 10] }
+  };
+
+  function loadPref(key, def) {
+    try { const v = localStorage.getItem(key); return v === null ? def : v; } catch (err) { return def; }
+  }
+  let difficulty = loadPref('stageLightDiff', 'easy');
+  let theme = loadPref('stageLightTheme', 'stage');
+  let soundOn = loadPref('stageLightSound', '1') === '1';
+  let audioCtx = null;
+
+  function activeLights() { return LIGHTS.filter(function(s) { return difficulty === 'easy' ? EASY_IDS.indexOf(s.id) >= 0 : true; }); }
+  function activeEffects() {
+    const ids = new Set(activeLights().map(function(s) { return s.answer; }));
+    return EFFECTS.filter(function(c) { return ids.has(c.id); });
+  }
+  function totalCount() { return activeLights().length; }
+  function bestKey() { return 'stageLightGameBest_' + difficulty; }
+
+  // ---- 音效（Web Audio，无需素材） ----
+  function ensureAudio() {
+    if (!soundOn) return;
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (err) {} }
+    if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch (err) {} }
+  }
+  function tone(freq, start, dur, type, vol) {
+    if (!audioCtx || !soundOn) return;
+    try {
+      const t0 = audioCtx.currentTime + start;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol || 0.16, t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t0); o.stop(t0 + dur + 0.05);
+    } catch (err) {}
+  }
+  function sfxCorrect() { ensureAudio(); tone(523.25, 0, 0.14, 'sine', 0.18); tone(659.25, 0.09, 0.16, 'sine', 0.18); }
+  function sfxWrong() { ensureAudio(); tone(196, 0, 0.22, 'sawtooth', 0.12); tone(147, 0.08, 0.26, 'sawtooth', 0.12); }
+  function sfxMilestone() { ensureAudio(); [523.25, 659.25, 783.99, 1046.5].forEach(function(f, i) { tone(f, i * 0.09, 0.18, 'triangle', 0.2); }); }
+  function sfxWin() { ensureAudio(); [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach(function(f, i) { tone(f, i * 0.12, 0.22, 'triangle', 0.2); }); }
+
+  // ---- 主题 ----
+  function applyTheme() {
+    document.body.setAttribute('data-theme', theme);
+    const btn = document.getElementById('btnTheme');
+    if (btn) btn.textContent = '🎨 ' + THEME_LABELS[theme];
+    try { localStorage.setItem('stageLightTheme', theme); } catch (err) {}
+  }
+  function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length]; applyTheme(); }
+
+  // ---- 音效开关 ----
+  function updateSoundBtn() {
+    const btn = document.getElementById('btnSound');
+    if (btn) btn.textContent = soundOn ? '🔊 音效' : '🔇 静音';
+    try { localStorage.setItem('stageLightSound', soundOn ? '1' : '0'); } catch (err) {}
+  }
+  function toggleSound() { soundOn = !soundOn; updateSoundBtn(); }
+
+  // ---- 难度 ----
+  function setDifficulty(d) {
+    if (difficulty === d) return;
+    difficulty = d;
+    try { localStorage.setItem('stageLightDiff', d); } catch (err) {}
+    document.querySelectorAll('.btn-diff').forEach(function(b) { b.classList.toggle('active', b.dataset.diff === d); });
+    freshRound();
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+  let lightOrder = shuffleArray(activeLights());
+  let assignments = {};
+  let matchedLights = new Set();
+  let streak = 0;
+  let mistakes = 0;
+  let history = [];
+  let completedShown = false;
+  let selectedLightId = null;
+  let draggedId = null;
+  let ghost = null;
+  let dragActive = false;
+  let dragSlotId = null;
+  let suppressClick = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startedDrag = false;
+
+  // ===== 渲染 =====
+  function renderStickers() {
+    const sheet = document.getElementById('stickerSheet');
+    sheet.innerHTML = '';
+    lightOrder.forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'sticker' + (matchedLights.has(s.id) ? ' matched' : '');
+      el.dataset.id = s.id;
+      el.innerHTML =
+        '<div class="lightimg">' + s.img + '</div>' +
+        '<div><div class="lname">' + s.name + '<span class="en">' + s.en + '</span></div>' +
+        '<div class="hint">💡 ' + s.hint + '</div></div>';
+      el.addEventListener('pointerdown', onPointerDown);
+      el.addEventListener('pointermove', onPointerMove);
+      el.addEventListener('pointerup', onPointerUp);
+      el.addEventListener('pointercancel', onPointerCancel);
+      el.addEventListener('click', onStickerTap);
+      sheet.appendChild(el);
+    });
+  }
+
+  function renderEffects() {
+    const list = document.getElementById('charList');
+    list.innerHTML = '';
+    activeEffects().forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'char-slot';
+      el.dataset.id = c.id;
+      el.innerHTML =
+        '<div class="row"><span class="icon">' + c.icon + '</span>' +
+        '<div><div class="title">' + c.title + '</div>' +
+        '<div class="desc">' + c.desc + '</div></div></div>' +
+        '<span class="placed"></span>';
+      el.addEventListener('click', onEffectTap);
+      list.appendChild(el);
+    });
+    updateEffectPlaced();
+  }
+
+  function updateEffectPlaced() {
+    activeEffects().forEach(c => {
+      const slot = document.querySelector('.char-slot[data-id="' + c.id + '"]');
+      const placed = slot.querySelector('.placed');
+      const assigned = Object.keys(assignments).filter(k => assignments[k] === c.id);
+      if (assigned.length > 0) {
+        const st = LIGHTS.find(s => s.id === assigned[0]);
+        placed.textContent = '← ' + st.name;
+      } else {
+        placed.textContent = '点选灯具…';
+      }
+    });
+  }
+
+  function updateProgress() {
+    const total = totalCount();
+    const matched = matchedLights.size;
+    const fill = document.getElementById('progressFill');
+    const txt = document.getElementById('progressText');
+    if (fill) fill.style.width = (matched / total * 100) + '%';
+    if (txt) {
+      let s = '已正确匹配 ' + matched + ' / ' + total;
+      if (streak >= 2) s += ' · 🔥 连对 ' + streak;
+      if (mistakes > 0) s += ' · 错误 ' + mistakes + ' 次';
+      txt.textContent = s;
+    }
+    updateBest();
+  }
+
+  function updateBest() {
+    const b = loadBest();
+    const el = document.getElementById('bestInfo');
+    if (el) el.textContent = b > 0 ? '🏅 个人最佳：' + b + ' / ' + totalCount() : '';
+  }
+
+  function loadBest() {
+    try {
+      let v = localStorage.getItem(bestKey());
+      if (v === null && difficulty === 'full') v = localStorage.getItem('stageLightBest');
+      return parseInt(v || '0', 10) || 0;
+    } catch (err) { return 0; }
+  }
+
+  function saveBest() {
+    const m = matchedLights.size;
+    if (m > loadBest()) {
+      try { localStorage.setItem(bestKey(), String(m)); } catch (err) {}
+    }
+  }
+
+  function setResult(msg, cls) {
+    const r = document.getElementById('result');
+    r.textContent = msg;
+    r.className = 'result' + (cls ? ' ' + cls : '');
+  }  // ===== 统一拖拽（鼠标 + 触屏） =====
+  function onPointerDown(e) {
+    const id = e.currentTarget.dataset.id;
+    if (matchedLights.has(id)) return;
+    selectSticker(id);
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    startedDrag = false;
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+
+  function onPointerMove(e) {
+    if (pointerId !== e.pointerId) return;
+    if (!startedDrag) {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) + Math.abs(dy) < 8) return;
+      beginDrag(e.currentTarget, e.clientX, e.clientY);
+    }
+    if (!dragActive) return;
+    e.preventDefault();
+    moveGhost(e.clientX, e.clientY);
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const slot = under ? under.closest('.char-slot') : null;
+    highlightSlot(slot ? slot.dataset.id : null);
+  }
+
+  function onPointerUp(e) {
+    if (pointerId !== e.pointerId) return;
+    pointerId = null;
+    const wasDrag = startedDrag;
+    startedDrag = false;
+    if (wasDrag && dragActive) {
+      e.preventDefault();
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      const slot = under ? under.closest('.char-slot') : null;
+      if (slot && draggedId) {
+        suppressClick = true;
+        setTimeout(function() { suppressClick = false; }, 0);
+        selectedLightId = null;
+        placeLight(draggedId, slot.dataset.id);
+      }
+    }
+    endDrag();
+  }
+
+  function onPointerCancel(e) {
+    if (pointerId !== e.pointerId) return;
+    pointerId = null;
+    startedDrag = false;
+    endDrag();
+  }
+
+  function beginDrag(sticker, x, y) {
+    startedDrag = true;
+    dragActive = true;
+    draggedId = sticker.dataset.id;
+    ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    ghost.innerHTML = sticker.innerHTML;
+    document.body.appendChild(ghost);
+    sticker.classList.add('dragging');
+    moveGhost(x, y);
+  }
+
+  function moveGhost(x, y) {
+    if (!ghost) return;
+    ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
+    ghost.style.top = (y - ghost.offsetHeight / 2) + 'px';
+  }
+
+  function highlightSlot(id) {
+    if (dragSlotId === id) return;
+    document.querySelectorAll('.char-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+    dragSlotId = id;
+    if (id) {
+      const slot = document.querySelector('.char-slot[data-id="' + id + '"]');
+      if (slot) slot.classList.add('drag-over');
+    }
+  }
+
+  function endDrag() {
+    dragActive = false;
+    draggedId = null;
+    dragSlotId = null;
+    pointerId = null;
+    startedDrag = false;
+    if (ghost) { ghost.remove(); ghost = null; }
+    document.querySelectorAll('.sticker.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.char-slot.drag-over').forEach(s => s.classList.remove('drag-over'));
+  }
+
+  function selectSticker(id) {
+    selectedLightId = id;
+    document.querySelectorAll('.sticker.selected').forEach(el => el.classList.remove('selected'));
+    const el = document.querySelector('.sticker[data-id="' + id + '"]');
+    if (el) el.classList.add('selected');
+  }
+
+  // ===== 点选（备选操作方式） =====
+  function onStickerTap(e) {
+    if (suppressClick) return;
+    const id = e.currentTarget.dataset.id;
+    if (matchedLights.has(id)) return;
+    selectSticker(id);
+  }
+
+  function onEffectTap(e) {
+    if (selectedLightId === null) return;
+    const fxId = e.currentTarget.dataset.id;
+    placeLight(selectedLightId, fxId);
+    selectedLightId = null;
+    document.querySelectorAll('.sticker.selected').forEach(el => el.classList.remove('selected'));
+  }
+
+  // ===== 匹配判定与反馈 =====
+  function releaseLight(lightId) {
+    const fxId = assignments[lightId];
+    delete assignments[lightId];
+    matchedLights.delete(lightId);
+    if (fxId) {
+      const slot = document.querySelector('.char-slot[data-id="' + fxId + '"]');
+      if (slot) slot.classList.remove('correct', 'wrong', 'shake', 'pop');
+    }
+    const lightEl = document.querySelector('.sticker[data-id="' + lightId + '"]');
+    if (lightEl) lightEl.classList.remove('matched', 'selected');
+    updateEffectPlaced();
+    updateProgress();
+  }
+
+  function setAssignment(lightId, fxId) {
+    const displaced = Object.keys(assignments).find(k => assignments[k] === fxId);
+    if (displaced && displaced !== lightId) releaseLight(displaced);
+    const oldFx = assignments[lightId];
+    if (oldFx && oldFx !== fxId) {
+      const oldSlot = document.querySelector('.char-slot[data-id="' + oldFx + '"]');
+      if (oldSlot) oldSlot.classList.remove('correct', 'wrong', 'shake', 'pop');
+    }
+    assignments[lightId] = fxId;
+    const slot = document.querySelector('.char-slot[data-id="' + fxId + '"]');
+    const light = LIGHTS.find(s => s.id === lightId);
+    const ok = !!(light && light.answer === fxId);
+    if (ok) { matchedLights.add(lightId); } else { matchedLights.delete(lightId); }
+    if (slot) {
+      slot.classList.remove('correct', 'wrong', 'shake', 'pop');
+      slot.classList.add(ok ? 'correct' : 'wrong');
+    }
+    const lightEl = document.querySelector('.sticker[data-id="' + lightId + '"]');
+    if (lightEl) {
+      lightEl.classList.add('matched');
+      lightEl.classList.remove('selected');
+    }
+    updateEffectPlaced();
+    updateProgress();
+    return ok;
+  }
+
+  function placeLight(lightId, fxId) {
+    const light = LIGHTS.find(s => s.id === lightId);
+    if (!light) return;
+    history.push({
+      lightId: lightId,
+      fromFxId: assignments[lightId] || null,
+      toFxId: fxId,
+      displacedId: Object.keys(assignments).find(k => assignments[k] === fxId && k !== lightId) || null,
+      streak: streak,
+      mistakes: mistakes
+    });
+    const ok = setAssignment(lightId, fxId);
+    if (ok) {
+      streak++;
+      sfxCorrect();
+      const slot = document.querySelector('.char-slot[data-id="' + fxId + '"]');
+      if (slot) { slot.classList.remove('pop'); void slot.offsetWidth; slot.classList.add('pop'); }
+      const ms = DIFFS[difficulty].milestones;
+      if (streak === ms[0]) {
+        sfxMilestone();
+        setResult('🌟 达成 ' + ms[0] + ' 连胜！灯光师潜力初显！', 'success');
+      } else if (ms.length > 1 && streak === ms[1]) {
+        sfxMilestone();
+        setResult('🏆 ' + ms[1] + ' 连对！舞台已经被你点亮了！', 'success');
+      } else if (matchedLights.size === totalCount() && !completedShown) {
+        completedShown = true;
+        sfxWin();
+        setResult('👑 满分通关！全部 ' + totalCount() + ' 种灯具都认出来了！', 'success');
+        celebrate();
+      }
+    } else {
+      mistakes++;
+      streak = 0;
+      sfxWrong();
+      const slot = document.querySelector('.char-slot[data-id="' + fxId + '"]');
+      if (slot) { slot.classList.remove('shake'); void slot.offsetWidth; slot.classList.add('shake'); }
+      setResult('✗ 配对错了，再试试！', 'error');
+      setTimeout(function() {
+        if (assignments[lightId] === fxId) releaseLight(lightId);
+      }, 650);
+    }
+    updateProgress();
+    saveBest();
+  }
+
+  function undoLast() {
+    const last = history.pop();
+    if (!last) { setResult('没有可撤销的操作', 'error'); return; }
+    releaseLight(last.lightId);
+    if (last.displacedId) setAssignment(last.displacedId, last.toFxId);
+    if (last.fromFxId) setAssignment(last.lightId, last.fromFxId);
+    streak = last.streak;
+    mistakes = last.mistakes;
+    setResult('↩ 已撤销上一步', 'error');
+    updateProgress();
+  }
+
+  function celebrate() {
+    const colors = ['#ffd166', '#ff6b6b', '#4ecdc4', '#a29bfe', '#2ecc71', '#ff8fab'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = (Math.random() * 100) + 'vw';
+      c.style.top = '-18px';
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty('--dx', ((Math.random() - 0.5) * 180) + 'px');
+      c.style.setProperty('--dr', ((Math.random() - 0.5) * 560) + 'deg');
+      c.style.animationDelay = (Math.random() * 0.7) + 's';
+      document.body.appendChild(c);
+      setTimeout(function(el) { el.remove(); }, 2600 + i, c);
+    }
+  }
+
+  // ===== 操作 =====
+  function freshRound() {
+    assignments = {};
+    matchedLights = new Set();
+    streak = 0;
+    mistakes = 0;
+    history = [];
+    completedShown = false;
+    selectedLightId = null;
+    endDrag();
+    lightOrder = shuffleArray(activeLights());
+    document.querySelectorAll('.char-slot').forEach(s => s.classList.remove('correct', 'wrong', 'shake', 'pop', 'drag-over'));
+    setResult('', '');
+    renderStickers();
+    renderEffects();
+    updateProgress();
+    updateBest();
+  }
+
+  function shuffleLights() { freshRound(); }
+
+  function resetAll() { freshRound(); }
+
+  function checkAll() {
+    const total = totalCount();
+    const correct = matchedLights.size;
+    if (correct === total) {
+      setResult('🎉 全部正确！舞台灯光就位！', 'success');
+      if (!completedShown) {
+        completedShown = true;
+        celebrate();
+      }
+    } else if (correct === 0) {
+      setResult('还没开始匹配哦～', 'error');
+    } else {
+      setResult('⭐ 已正确匹配 ' + correct + ' / ' + total + ' · 继续加油！', 'error');
+    }
+  }
+
+  // ===== 初始化 =====
+  applyTheme();
+  updateSoundBtn();
+  document.querySelectorAll('.btn-diff').forEach(function(b) { b.classList.toggle('active', b.dataset.diff === difficulty); });
+  renderStickers();
+  renderEffects();
+  updateProgress();
+  updateBest();
+</script>
+</body>
+</html>
