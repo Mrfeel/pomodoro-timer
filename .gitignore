@@ -14,3 +14,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code 历史会话归档（含敏感信息，不提交）
+archive/
